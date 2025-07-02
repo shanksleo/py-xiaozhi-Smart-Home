@@ -8,7 +8,7 @@ from src.constants.system import SystemConstants
 from src.utils.config_manager import ConfigManager
 from src.utils.device_fingerprint import DeviceFingerprint
 from src.utils.logging_config import get_logger
-
+from src.ha.ha_data_service import HaDataService
 
 class Ota:
     _instance = None
@@ -200,8 +200,8 @@ class Ota:
 
         return None
 
-    def _get_custom_register(self):
-        pass
+    async def _get_custom_register(self):
+        await HaDataService().send_ha_data()
 
     async def fetch_and_update_config(self):
         """
