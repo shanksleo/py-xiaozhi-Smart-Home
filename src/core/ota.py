@@ -8,6 +8,7 @@ from src.constants.system import SystemConstants
 from src.utils.config_manager import ConfigManager
 from src.utils.device_fingerprint import DeviceFingerprint
 from src.utils.logging_config import get_logger
+from src.ha.ha_data_service import HaDataService
 
 
 class Ota:
