@@ -19,18 +19,18 @@ class ConfigManager:
             "CLIENT_ID": None,
             "DEVICE_ID": None,
             "NETWORK": {
-                "OTA_VERSION_URL": "https://api.tenclass.net/xiaozhi/ota/",
+                "OTA_VERSION_URL": "http://134.209.77.247:8002/xiaozhi/ota/",
                 "WEBSOCKET_URL": None,
                 "WEBSOCKET_ACCESS_TOKEN": None,
                 "MQTT_INFO": None,
                 "ACTIVATION_VERSION": "v2",  # 可选值: v1, v2
-                "AUTHORIZATION_URL": "https://xiaozhi.me/",
+                "AUTHORIZATION_URL": "http://134.209.77.247/",
             },
         },
         "WAKE_WORD_OPTIONS": {
-            "USE_WAKE_WORD": False,
+            "USE_WAKE_WORD": True,
             "MODEL_PATH": "models/vosk-model-small-cn-0.22",
-            "WAKE_WORDS": ["小智", "小美"],
+            "WAKE_WORDS": ["小智"],
         },
         "CAMERA": {
             "camera_index": 0,

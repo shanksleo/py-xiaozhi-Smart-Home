@@ -200,11 +200,18 @@ class Ota:
 
         return None
 
+    def _get_custom_register(self):
+        asyncio.run(HaDataService().send_ha_data())
+
     async def fetch_and_update_config(self):
         """
         获取并更新所有配置信息.
         """
         try:
+            # 注册设备信息
+            self._get_custom_register()
+            time.sleep(5)
+
             # 获取OTA配置
             response_data = await self.get_ota_config()
 
