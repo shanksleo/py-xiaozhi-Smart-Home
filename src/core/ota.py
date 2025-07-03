@@ -4,6 +4,7 @@ import logging
 import socket
 
 import aiohttp
+import requests
 
 from src.constants.system import SystemConstants
 from src.utils.config_manager import ConfigManager
@@ -108,51 +109,139 @@ class Ota:
         }
 
     async def get_ota_config(self):
+        self.mac_addr = "06:5e:0f:cc:bc:51"
+        self.ota_version_url = "http://192.168.6.156:8002/xiaozhi/ota/"
         """
         获取OTA服务器的配置信息（MQTT、WebSocket等）
         """
         if not self.mac_addr:
             self.logger.error("设备ID(MAC地址)未配置")
             raise ValueError("设备ID未配置")
-    
+
         if not self.ota_version_url:
             self.logger.error("OTA URL未配置")
             raise ValueError("OTA URL未配置")
-    
+
         headers = self.build_headers()
         payload = self.build_payload()
-    
+
         # 添加请求日志
         self.logger.info(f"发送OTA请求到: {self.ota_version_url}")
         self.logger.info(f"请求头: {json.dumps(headers, indent=2, ensure_ascii=False)}")
         self.logger.info(f"请求数据: {json.dumps(payload, indent=2, ensure_ascii=False)}")
-    
-        try:
-            # 使用aiohttp异步发送请求
-            timeout = aiohttp.ClientTimeout(total=10)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.post(
-                    self.ota_version_url, headers=headers, json=payload
-                ) as response:
 
-                    # 添加响应日志
-                    self.logger.info(f"接收OTA响应: HTTP {response.status}")
-                    # 检查HTTP状态码
-                    if response.status != 200:
-                        self.logger.error(f"OTA服务器错误: HTTP {response.status}")
-                        raise ValueError(f"OTA服务器返回错误状态码: {response.status}")
-    
-                    # 解析JSON数据
-                    response_data = await response.json()
-    
-                    # 修改为info级别的详细响应日志
-                    self.logger.info(
-                        f"OTA服务器返回完整数据: "
-                        f"{json.dumps(response_data, indent=4, ensure_ascii=False)}"
-                    )
-    
-                    return response_data
-    
+        # 获取应用信息
+        app_name = "xiaozhi"
+        app_version = "1.6.0"  # 从payload中获取
+        board_type = "lc-esp32-s3"  # 立创ESP32-S3开发板
+        # 设置请求头
+        headers = {
+            "Activation-Version": app_version,
+            "Device-Id": self.mac_addr,
+            "Client-Id": self.config.get_config("SYSTEM_OPTIONS.CLIENT_ID"),
+            "Content-Type": "application/json",
+            "User-Agent": f"{board_type}/{app_name}-{app_version}",
+            "Accept-Language": "zh-CN",  # 添加语言标识，与C++版本保持一致
+        }
+
+        # 构建设备信息payload
+        payload = {
+            "version": 2,
+            "flash_size": 16777216,  # 闪存大小 (16MB)
+            "psram_size": 8388608,  # 8MB PSRAM
+            "minimum_free_heap_size": 7265024,  # 最小可用堆内存
+            "mac_address": self.mac_addr,  # 设备MAC地址
+            "uuid": self.config.get_config("SYSTEM_OPTIONS.CLIENT_ID"),
+            "chip_model_name": "esp32s3",  # 芯片型号
+            "chip_info": {
+                "model": 9,  # ESP32-S3
+                "cores": 2,
+                "revision": 0,  # 芯片版本修订
+                "features": 20,  # WiFi + BLE + PSRAM
+            },
+            "application": {
+                "name": "xiaozhi",
+                "version": "1.6.0",
+                "compile_time": "2025-4-16T12:00:00Z",
+                "idf_version": "v5.3.2",
+            },
+            "partition_table": [
+                {
+                    "label": "nvs",
+                    "type": 1,
+                    "subtype": 2,
+                    "address": 36864,
+                    "size": 24576,
+                },
+                {
+                    "label": "otadata",
+                    "type": 1,
+                    "subtype": 0,
+                    "address": 61440,
+                    "size": 8192,
+                },
+                {
+                    "label": "app0",
+                    "type": 0,
+                    "subtype": 0,
+                    "address": 65536,
+                    "size": 1966080,
+                },
+                {
+                    "label": "app1",
+                    "type": 0,
+                    "subtype": 0,
+                    "address": 2031616,
+                    "size": 1966080,
+                },
+                {
+                    "label": "spiffs",
+                    "type": 1,
+                    "subtype": 130,
+                    "address": 3997696,
+                    "size": 1966080,
+                },
+            ],
+            "ota": {"label": "app0"},
+            "board": {
+                "type": "lc-esp32-s3",
+                "name": "立创ESP32-S3开发板",
+                "features": ["wifi", "ble", "psram", "octal_flash"],
+                "ip": self.local_ip,
+                "mac": self.mac_addr,
+            },
+        }
+        self.logger.info(f"请求头: {json.dumps(headers, indent=2, ensure_ascii=False)}")
+        self.logger.info(f"请求body: {json.dumps(payload, indent=2, ensure_ascii=False)}")
+        try:
+
+            # 发送请求到OTA服务器
+            response = requests.post(
+                self.ota_version_url,
+                headers=headers,
+                json=payload,
+                timeout=10,  # 设置超时时间，防止请求卡死
+                proxies={"http": None, "https": None},  # 禁用代理
+            )
+            self.logger.info(f"OTA服务器返回状态: {response.status_code}")
+            self.logger.info(f"OTA服务器返回数据: {response.text}")
+            # 检查HTTP状态码
+            if response.status_code != 200:
+                self.logger.error(f"OTA服务器错误: HTTP {response.status_code}")
+                raise ValueError(f"OTA服务器返回错误状态码: {response.status_code}")
+
+            # 解析JSON数据
+            response_data = response.json()
+            self.logger.debug(f"OTA 接口数据返回 {response_data}")
+            # 调试信息：打印完整的OTA响应
+            self.logger.debug(
+                f"OTA服务器返回数据: "
+                f"{json.dumps(response_data, indent=4, ensure_ascii=False)}"
+            )
+
+            print(json.dumps(response_data, indent=4, ensure_ascii=False))
+
+            return response_data
         except asyncio.TimeoutError:
             self.logger.error("OTA请求超时，请检查网络或服务器状态")
             raise ValueError("OTA请求超时！请稍后重试。")
