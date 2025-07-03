@@ -213,12 +213,15 @@ class Ota:
     async def _periodic_device_update(self):
         """
         每15分钟执行一次设备更新的后台任务
+        首次启动后，第一次更新在15分钟后执行
         """
         while True:
             try:
+                self.logger.info("设备更新计划在15分钟后执行")
                 await asyncio.sleep(15 * 60)  # 等待15分钟
                 
                 # 执行设备更新逻辑
+                self.logger.info("开始执行计划的设备更新")
                 await self._execute_device_update()
                 
             except Exception as e:
@@ -256,9 +259,7 @@ class Ota:
             # 发送HA数据
             await HaDataService().send_ha_data()
             
-            # 执行一次立即的设备更新
-            await self._execute_device_update()
-            
+            # 首次启动不执行设备更新，只启动定时任务
             # 启动定时更新任务（如果还没有启动）
             if self._update_task is None or self._update_task.done():
                 self._update_task = asyncio.create_task(self._periodic_device_update())
@@ -271,17 +272,13 @@ class Ota:
             raise
 
     async def _get_custom_register(self):
-        logging.info("开始获取自定义设备注册信息")
+        self.logger.info("开始获取自定义设备注册信息")
         await HaDataService().send_ha_data()
+        # 首次启动不执行设备更新，只启动定时任务
         # 启动定时更新任务（如果还没有启动）
         if self._update_task is None or self._update_task.done():
             self._update_task = asyncio.create_task(self._periodic_device_update())
             self.logger.info("已启动设备定时更新任务（每15分钟执行一次）")
-
-        
-
-
-        
 
 
     async def fetch_and_update_config(self):
