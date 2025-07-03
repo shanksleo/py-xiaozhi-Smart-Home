@@ -134,6 +134,9 @@ class Ota:
                 async with session.post(
                     self.ota_version_url, headers=headers, json=payload
                 ) as response:
+
+                    # 添加响应日志
+                    self.logger.info(f"接收OTA响应: HTTP {response.status}")
                     # 检查HTTP状态码
                     if response.status != 200:
                         self.logger.error(f"OTA服务器错误: HTTP {response.status}")
