@@ -109,14 +109,19 @@ class Ota:
         if not self.mac_addr:
             self.logger.error("设备ID(MAC地址)未配置")
             raise ValueError("设备ID未配置")
-
+    
         if not self.ota_version_url:
             self.logger.error("OTA URL未配置")
             raise ValueError("OTA URL未配置")
-
+    
         headers = self.build_headers()
         payload = self.build_payload()
-
+    
+        # 添加请求日志
+        self.logger.info(f"发送OTA请求到: {self.ota_version_url}")
+        self.logger.info(f"请求头: {json.dumps(headers, indent=2, ensure_ascii=False)}")
+        self.logger.info(f"请求数据: {json.dumps(payload, indent=2, ensure_ascii=False)}")
+    
         try:
             # 使用aiohttp异步发送请求
             timeout = aiohttp.ClientTimeout(total=10)
@@ -128,22 +133,22 @@ class Ota:
                     if response.status != 200:
                         self.logger.error(f"OTA服务器错误: HTTP {response.status}")
                         raise ValueError(f"OTA服务器返回错误状态码: {response.status}")
-
+    
                     # 解析JSON数据
                     response_data = await response.json()
-
-                    # 调试信息：打印完整的OTA响应
-                    self.logger.debug(
-                        f"OTA服务器返回数据: "
+    
+                    # 修改为info级别的详细响应日志
+                    self.logger.info(
+                        f"OTA服务器返回完整数据: "
                         f"{json.dumps(response_data, indent=4, ensure_ascii=False)}"
                     )
-
+    
                     return response_data
-
+    
         except asyncio.TimeoutError:
             self.logger.error("OTA请求超时，请检查网络或服务器状态")
             raise ValueError("OTA请求超时！请稍后重试。")
-
+    
         except aiohttp.ClientError as e:
             self.logger.error(f"OTA请求失败: {e}")
             raise ValueError("无法连接到OTA服务器，请检查网络连接！")
