@@ -5,6 +5,7 @@ import ssl
 import websockets
 
 from src.constants.constants import AudioConfig
+from src.ha.ha_command_service import parse_command_json
 from src.protocols.protocol import Protocol
 from src.utils.config_manager import ConfigManager
 from src.utils.logging_config import get_logger
@@ -118,6 +119,12 @@ class WebsocketProtocol(Protocol):
                         if msg_type == "hello":
                             # 处理服务器 hello 消息
                             await self._handle_server_hello(data)
+                        elif msg_type == "smart_home":
+                            parse_command_json(data)
+                            logger.info(f"smart_home data = {data}")
+                            # 收到 smart_home 消息后主动断开 websocket 连接
+                            logger.info("收到 smart_home 消息，主动断开 websocket 连接")
+                            asyncio.create_task(self.close_audio_channel())
                         else:
                             if self._on_incoming_json:
                                 self._on_incoming_json(data)
