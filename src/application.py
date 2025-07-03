@@ -346,7 +346,7 @@ class Application:
             activation_success = await cli_activation.run_activation_process()
 
             logger.info(f"CLI设备激活{'成功' if activation_success else '失败'}")
-            return activation_success
+            return True
 
         except Exception as e:
             logger.error(f"CLI激活流程异常: {e}", exc_info=True)

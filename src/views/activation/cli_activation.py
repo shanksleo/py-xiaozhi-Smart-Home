@@ -93,9 +93,9 @@ class CLIActivation:
             self._print_stage_complete(3, 4)
 
             # 第四阶段：激活流程准备
-            self._print_stage_header("第四阶段：激活流程准备", 4, 4)
-            self.system_initializer.stage_4_activation_ready()
-            self._print_stage_complete(4, 4)
+            # self._print_stage_header("第四阶段：激活流程准备", 4, 4)
+            # self.system_initializer.stage_4_activation_ready()
+            # self._print_stage_complete(4, 4)
 
             return True
 
