@@ -209,7 +209,7 @@ class Ota:
         """
         try:
             # 注册设备信息
-            self._get_custom_register()
+            await self._get_custom_register()
 
             # 获取OTA配置
             response_data = await self.get_ota_config()

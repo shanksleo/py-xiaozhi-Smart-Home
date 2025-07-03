@@ -4,7 +4,7 @@ from src.ha.ha_data import ha_service_data
 from src.ha.ha_data_fecth_all_devices_service import HomeAssistantModelAPI
 from src.ha.ha_data_fecth_service import HaDataFetchService
 from src.ha.ha_data_post_service import HomeAssistantRegistrationAPI
-from src.utils.device_fingerprint import get_device_fingerprint
+from src.utils.device_fingerprint import DeviceFingerprint
 
 
 class HaDataService:
@@ -20,13 +20,12 @@ class HaDataService:
             dict: 注册结果
         """
         # 获取 DeviceFingerprint 实例
-        device_fingerprint = get_device_fingerprint()
+        device_fingerprint = DeviceFingerprint.get_instance()
 
-        # 获取 MAC 地址和网卡类型
-        mac_address, mac_type = device_fingerprint.get_mac_address()
+        # 获取 MAC 地址
+        mac_address = device_fingerprint.get_mac_address()
         mac_address_val = mac_address
-        mac_type_val = mac_type
-        print(f"MAC 地址: {mac_address_val}, 类型: {mac_type_val}")
+        print(f"MAC 地址: {mac_address_val}")
 
         xiaozhi_device_info = {
             "macAddress": mac_address,
