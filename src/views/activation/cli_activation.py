@@ -175,22 +175,21 @@ class CLIActivation:
         """
         try:
             self.activation_data = activation_data
-
+    
             # 显示激活信息
             self._show_activation_info(activation_data)
-
+    
             # 初始化设备激活器
             config_manager = self.system_initializer.get_config_manager()
             self.device_activator = DeviceActivator(config_manager)
-
+    
             # 开始激活流程
             self._log_and_print("\n开始设备激活流程...")
             print("正在连接激活服务器，请保持网络连接...")
-
-            activation_success = await asyncio.to_thread(
-                self.device_activator.process_activation, activation_data
-            )
-
+    
+            # 直接await异步方法，不使用asyncio.to_thread
+            activation_success = await self.device_activator.process_activation(activation_data)
+    
             if activation_success:
                 self._log_and_print("\n设备激活成功！")
                 self._print_activation_success()
@@ -199,7 +198,7 @@ class CLIActivation:
                 self._log_and_print("\n设备激活失败")
                 self._print_activation_failure()
                 return False
-
+    
         except Exception as e:
             self.logger.error(f"激活流程异常: {e}", exc_info=True)
             self._log_and_print(f"\n激活异常: {e}")
