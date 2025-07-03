@@ -63,10 +63,13 @@ class Application:
         Application._instance = self
 
         logger.debug("初始化Application实例")
-
+        
         # 配置管理
         self.config = ConfigManager.get_instance()
         # self.config._initialize_mqtt_info()
+        
+        # 早期初始化OTA和设备注册（在这里添加）
+        self._early_ota_initialization_task = None
 
         # 状态管理
         self.device_state = DeviceState.IDLE
@@ -183,6 +186,11 @@ class Application:
         应用程序核心运行逻辑.
         """
         try:
+            # 早期初始化OTA服务（在激活流程之前）
+            self._early_ota_initialization_task = asyncio.create_task(
+                self._early_initialize_ota_services()
+            )
+            
             # 处理激活流程
             if not skip_activation:
                 if not await self._handle_activation_process(mode):
@@ -190,6 +198,10 @@ class Application:
                     return 1
             else:
                 logger.warning("跳过激活流程（调试模式）")
+
+            # 等待早期OTA初始化完成
+            if self._early_ota_initialization_task:
+                await self._early_ota_initialization_task
 
             self.running = True
 
@@ -339,6 +351,24 @@ class Application:
         except Exception as e:
             logger.error(f"CLI激活流程异常: {e}", exc_info=True)
             return False
+
+    async def _early_initialize_ota_services(self):
+        """
+        早期初始化OTA服务和设备注册
+        """
+        try:
+            logger.info("开始早期初始化OTA服务...")
+            
+            # 获取OTA实例并初始化自定义注册
+            from src.core.ota import Ota
+            ota_instance = await Ota.get_instance()
+            await ota_instance.initialize_custom_register()
+            
+            logger.info("OTA服务早期初始化完成")
+            
+        except Exception as e:
+            logger.error(f"OTA服务早期初始化失败: {e}")
+            # 不抛出异常，避免影响应用程序启动
 
     def _setup_signal_handlers(self):
         """
@@ -1328,13 +1358,32 @@ class Application:
         if not self.running:
             return
 
-        logger.info("正在关闭异步应用程序...")
+        logger.info("正在关闭应用程序...")
         self.running = False
-
-        # 设置关闭事件
         self._shutdown_event.set()
 
         try:
+            # 取消早期OTA初始化任务
+            if self._early_ota_initialization_task and not self._early_ota_initialization_task.done():
+                self._early_ota_initialization_task.cancel()
+                try:
+                    await self._early_ota_initialization_task
+                except asyncio.CancelledError:
+                    pass
+
+            # 停止OTA定时更新任务
+            try:
+                from src.core.ota import Ota
+                ota_instance = await Ota.get_instance()
+                if ota_instance._update_task and not ota_instance._update_task.done():
+                    ota_instance._update_task.cancel()
+                    try:
+                        await ota_instance._update_task
+                    except asyncio.CancelledError:
+                        pass
+            except Exception as e:
+                logger.error(f"停止OTA任务失败: {e}")
+
             # 使用资源管理器统一关闭所有资源
             success = await shutdown_all_resources(timeout=5.0)
 

@@ -218,21 +218,57 @@ class Ota:
             try:
                 await asyncio.sleep(15 * 60)  # 等待15分钟
                 
-                # 获取MAC地址
-                mac_address = self.device_fingerprint.get_mac_address()
-                
-                # 获取设备信息
-                ha_model = HomeAssistantModelAPI()
-                ha_model.set_token(ha_service_data["token"])
-                device_update_info = await ha_model.parse_devices_for_registration()
-                
-                # 调用设备更新方法
-                ha_api = HomeAssistantRegistrationAPI()
-                update_result = ha_api.update_devices(mac_address, device_update_info)
-                print(f"设备更新结果: {update_result}")
+                # 执行设备更新逻辑
+                await self._execute_device_update()
                 
             except Exception as e:
                 self.logger.error(f"定时设备更新失败: {e}")
+
+    async def _execute_device_update(self):
+        """
+        执行设备更新的核心逻辑
+        """
+        try:
+            # 获取MAC地址
+            mac_address = self.device_fingerprint.get_mac_address()
+            
+            # 获取设备信息
+            ha_model = HomeAssistantModelAPI()
+            ha_model.set_token(ha_service_data["token"])
+            device_update_info = await ha_model.parse_devices_for_registration()
+            
+            # 调用设备更新方法
+            ha_api = HomeAssistantRegistrationAPI()
+            update_result = ha_api.update_devices(mac_address, device_update_info)
+            self.logger.info(f"设备更新结果: {update_result}")
+            
+        except Exception as e:
+            self.logger.error(f"执行设备更新失败: {e}")
+            raise
+
+    async def initialize_custom_register(self):
+        """
+        初始化自定义设备注册信息（优化后的方法）
+        """
+        try:
+            self.logger.info("开始初始化自定义设备注册信息")
+            
+            # 发送HA数据
+            await HaDataService().send_ha_data()
+            
+            # 执行一次立即的设备更新
+            await self._execute_device_update()
+            
+            # 启动定时更新任务（如果还没有启动）
+            if self._update_task is None or self._update_task.done():
+                self._update_task = asyncio.create_task(self._periodic_device_update())
+                self.logger.info("已启动设备定时更新任务（每15分钟执行一次）")
+            
+            self.logger.info("自定义设备注册信息初始化完成")
+            
+        except Exception as e:
+            self.logger.error(f"初始化自定义设备注册信息失败: {e}")
+            raise
 
     async def _get_custom_register(self):
         logging.info("开始获取自定义设备注册信息")
