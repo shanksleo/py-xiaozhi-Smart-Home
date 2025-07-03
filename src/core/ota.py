@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import socket
 
 import aiohttp
@@ -234,8 +235,8 @@ class Ota:
                 self.logger.error(f"定时设备更新失败: {e}")
 
     async def _get_custom_register(self):
+        logging.info("开始获取自定义设备注册信息")
         await HaDataService().send_ha_data()
-        
         # 启动定时更新任务（如果还没有启动）
         if self._update_task is None or self._update_task.done():
             self._update_task = asyncio.create_task(self._periodic_device_update())
