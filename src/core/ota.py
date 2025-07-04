@@ -109,8 +109,8 @@ class Ota:
         }
 
     async def get_ota_config(self):
-        self.mac_addr = "06:5e:0f:cc:bc:51"
-        self.ota_version_url = "http://134.209.77.247:8002/xiaozhi/ota/"
+        # self.mac_addr = "06:5e:0f:cc:bc:51"
+        # self.ota_version_url = "http://134.209.77.247:8002/xiaozhi/ota/"
         """
         获取OTA服务器的配置信息（MQTT、WebSocket等）
         """
