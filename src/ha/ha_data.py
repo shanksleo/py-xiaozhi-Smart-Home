@@ -1,10 +1,10 @@
 ha_device_data = {
-    "light": "light.ftd_cn_1123337548_ftdlmp_s_2_light",
-    "air_conditioner": "climate.scdvb_cn_1102732000_acm",
-    "curtain": "cover.xiaomi_cn_708478375_acn009_s_2_curtain",
-    "smart_switch": "switch.090615_cn_792978759_akpro4_on_p_2_1",
-    "tv": "button.xiaomi_cn_884903134_mih1_turn_on_a_6_1",
-
+    "light": "light.philips_cn_876480801_pceilb_s_2_light",
+    "air_conditioner": "climate.xiaomi_cn_929257320_h39h00",
+    "curtain": "cover.xiaomi_cn_875995008_acn010_s_2_curtain",
+    # "smart_switch": "switch.090615_cn_792978759_akpro4_on_p_2_1",
+    # "tv": "button.xiaomi_cn_884903134_mih1_turn_on_a_6_1",
+    "air_clean":"fan.xiaomi_cn_858574342_va3_s_2_air_purifier"
     # "tv_on": "button.xiaomi_cn_884903134_mih1_turn_on_a_6_1",
     # "tv_off": "button.xiaomi_cn_884903134_mih1_turn_off_a_2_1"
 }
@@ -24,8 +24,8 @@ ha_service_data = {
 }
 
 xiao_zhi_server_data = {
-    "host":"134.209.77.247",
+    "host":"101.37.209.81",
     "port":"8002",
-    "token":"f09436f0-6999-4ec1-8dde-df9d47199f61",
+    "token":"d074432a-1667-4ebf-88ca-fd53f9eb4092",
     "use_ssl": False
 }
