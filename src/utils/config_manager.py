@@ -19,12 +19,12 @@ class ConfigManager:
             "CLIENT_ID": None,
             "DEVICE_ID": None,
             "NETWORK": {
-                "OTA_VERSION_URL": "http://134.209.77.247:8002/xiaozhi/ota/",
+                "OTA_VERSION_URL": "http://101.37.209.81:8002/xiaozhi/ota/",
                 "WEBSOCKET_URL": None,
                 "WEBSOCKET_ACCESS_TOKEN": None,
                 "MQTT_INFO": None,
                 "ACTIVATION_VERSION": "v1",  # 可选值: v1, v2
-                "AUTHORIZATION_URL": "http://134.209.77.247:8002/",
+                "AUTHORIZATION_URL": "http://101.37.209.81:8002/",
             },
         },
         "WAKE_WORD_OPTIONS": {

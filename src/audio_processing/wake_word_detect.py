@@ -503,13 +503,17 @@ class WakeWordDetector:
         """
         暂停检测.
         """
+        logger.info(f"暂停唤醒词检测 - 当前运行状态: {self.is_running_flag}, 暂停状态: {self.paused}")
         self.paused = True
+        logger.info("唤醒词检测已暂停")
 
     async def resume(self):
         """
         恢复检测.
         """
+        logger.info(f"恢复唤醒词检测 - 当前运行状态: {self.is_running_flag}, 暂停状态: {self.paused}")
         self.paused = False
+        logger.info("唤醒词检测已恢复")
 
     def is_running(self) -> bool:
         """

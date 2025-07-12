@@ -10,6 +10,21 @@ from src.protocols.protocol import Protocol
 from src.utils.config_manager import ConfigManager
 from src.utils.logging_config import get_logger
 
+# 导入日志服务
+try:
+    from src.services.smart_home_logging_service import get_smart_home_logging_service
+except ImportError:
+    try:
+        from services.smart_home_logging_service import get_smart_home_logging_service
+    except ImportError:
+        # 创建模拟函数用于测试
+        def get_smart_home_logging_service():
+            class MockLoggingService:
+                async def log_smart_home_message(self, data):
+                    print(f"模拟日志上报: {data}")
+                    return True
+            return MockLoggingService()
+
 ssl_context = ssl._create_unverified_context()
 
 logger = get_logger(__name__)
@@ -120,11 +135,14 @@ class WebsocketProtocol(Protocol):
                             # 处理服务器 hello 消息
                             await self._handle_server_hello(data)
                         elif msg_type == "smart_home":
+                            # 异步记录日志（不阻塞主流程）
+                            asyncio.create_task(self._log_smart_home_message(data))
+                            
                             parse_command_json(data)
                             logger.info(f"smart_home data = {data}")
                             # 收到 smart_home 消息后主动断开 websocket 连接
-                            logger.info("收到 smart_home 消息，主动断开 websocket 连接")
-                            asyncio.create_task(self.close_audio_channel())
+                            # logger.info("收到 smart_home 消息，主动断开 websocket 连接")
+                            # asyncio.create_task(self.close_audio_channel())
                         else:
                             if self._on_incoming_json:
                                 self._on_incoming_json(data)
@@ -185,8 +203,12 @@ class WebsocketProtocol(Protocol):
         Returns:
             bool: 连接是否成功
         """
+        logger.info(f"开始打开音频通道 - 当前连接状态: {self.connected}, WebSocket对象: {self.websocket is not None}")
         if not self.connected:
-            return await self.connect()
+            result = await self.connect()
+            logger.info(f"音频通道连接结果: {result}")
+            return result
+        logger.info("音频通道已经打开")
         return True
 
     async def _handle_server_hello(self, data: dict):
@@ -215,15 +237,41 @@ class WebsocketProtocol(Protocol):
             if self._on_network_error:
                 self._on_network_error(f"处理服务器响应失败: {str(e)}")
 
+    async def _log_smart_home_message(self, data: dict):
+        """
+        异步记录智能家居消息日志
+        
+        Args:
+            data: smart_home 消息数据
+        """
+        try:
+            logger.info(f"[WebSocket] 开始记录smart_home消息日志")
+            
+            # 获取日志服务实例
+            logging_service = get_smart_home_logging_service()
+            
+            # 异步上报日志
+            success = await logging_service.log_smart_home_message(data)
+            
+            if success:
+                logger.info(f"[WebSocket] smart_home消息日志上报成功")
+            else:
+                logger.warning(f"[WebSocket] smart_home消息日志上报失败")
+                
+        except Exception as e:
+            logger.error(f"[WebSocket] smart_home消息日志上报异常: {e}")
+
     async def close_audio_channel(self):
         """
         关闭音频通道.
         """
+        logger.info(f"开始关闭音频通道 - 当前连接状态: {self.connected}, WebSocket对象: {self.websocket is not None}")
         if self.websocket:
             try:
                 await self.websocket.close()
                 self.websocket = None
                 self.connected = False
+                logger.info("音频通道已关闭")
                 if self._on_audio_channel_closed:
                     await self._on_audio_channel_closed()
             except Exception as e:

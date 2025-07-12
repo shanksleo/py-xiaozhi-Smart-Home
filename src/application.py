@@ -358,12 +358,10 @@ class Application:
         """
         try:
             logger.info("开始早期初始化OTA服务...")
-            
             # 获取OTA实例并初始化自定义注册
             from src.core.ota import Ota
             ota_instance = await Ota.get_instance()
             await ota_instance.initialize_custom_register()
-            
             logger.info("OTA服务早期初始化完成")
             
         except Exception as e:
@@ -774,8 +772,10 @@ class Application:
 
                 # 清空缓冲区并重新初始化音频流
                 if self.audio_codec:
+                    logger.info("开始监听前 - 清空音频缓冲区并重新初始化输入流")
                     await self.audio_codec.clear_audio_queue()
                     await self.audio_codec.reinitialize_stream(is_input=True)
+                    logger.info("音频流重新初始化完成")
 
                 await self.protocol.send_start_listening(ListeningMode.MANUAL)
                 await self._set_device_state(DeviceState.LISTENING)
@@ -918,6 +918,7 @@ class Application:
         """
         处理监听状态.
         """
+        logger.info("进入聆听状态 - 开始处理监听状态")
         if self.display:
             asyncio.create_task(self.display.update_status("聆听中..."))
         self.set_emotion("neutral")
@@ -926,6 +927,7 @@ class Application:
         asyncio.create_task(self._manage_audio_input("resume"))
         # 确保进入监听状态时缓冲区是干净的
         if self.audio_codec:
+            logger.info("聆听状态 - 清空音频缓冲区")
             asyncio.create_task(self.audio_codec.clear_audio_queue())
 
     async def _manage_wake_word_detector(self, action):
@@ -933,8 +935,10 @@ class Application:
         管理唤醒词检测器.
         """
         if not self.wake_word_detector:
+            logger.warning("唤醒词检测器未初始化，无法执行管理操作")
             return
 
+        logger.info(f"管理唤醒词检测器 - 动作: {action}")
         if action == "pause":
             await self.wake_word_detector.pause()
         elif action == "resume":
@@ -945,8 +949,10 @@ class Application:
         管理音频输入.
         """
         if not self.audio_codec:
+            logger.warning("音频编解码器未初始化，无法管理音频输入")
             return
 
+        logger.info(f"管理音频输入 - 动作: {action}")
         # 现在只需要确保音频输入始终活跃，不再暂停
         if action == "resume":
             await self.audio_codec.resume_input()
@@ -1222,13 +1228,16 @@ class Application:
         """
         处理唤醒词检测事件.
         """
+        logger.info(f"处理唤醒词检测事件 - 唤醒词: {wake_word}, 当前设备状态: {self.device_state}")
         if self.device_state == DeviceState.IDLE:
             if self.wake_word_detector:
+                logger.info("暂停唤醒词检测器，准备进入连接状态")
                 await self.wake_word_detector.pause()
 
             await self._set_device_state(DeviceState.CONNECTING)
             await self._connect_and_start_listening(wake_word)
         elif self.device_state == DeviceState.SPEAKING:
+            logger.info("设备正在说话，中止语音输出")
             await self.abort_speaking(AbortReason.WAKE_WORD_DETECTED)
 
     async def _connect_and_start_listening(self, wake_word):

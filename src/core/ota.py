@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import socket
+import time
 
 import aiohttp
 import requests
@@ -109,8 +110,8 @@ class Ota:
         }
 
     async def get_ota_config(self):
-        self.mac_addr = "06:5e:0f:cc:bc:51"
-        self.ota_version_url = "http://134.209.77.247:8002/xiaozhi/ota/"
+        # self.mac_addr = "06:5e:0f:cc:bc:51"
+        # self.ota_version_url = "http://101.37.209.81:8002/xiaozhi/ota/"
         """
         获取OTA服务器的配置信息（MQTT、WebSocket等）
         """
@@ -346,7 +347,7 @@ class Ota:
         初始化自定义设备注册信息（优化后的方法）
         """
         try:
-            self.logger.info("开始初始化自定义设备注册信息")
+            self.logger.info("[重要的一步，每次启动必须调用]开始初始化自定义设备注册信息")
             
             # 发送HA数据
             await HaDataService().send_ha_data()
@@ -379,7 +380,8 @@ class Ota:
         """
         try:
             # 注册设备信息
-            # await self._get_custom_register()
+            await self._get_custom_register()
+            time.sleep(3)
 
             # 获取OTA配置
             response_data = await self.get_ota_config()

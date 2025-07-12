@@ -212,7 +212,7 @@ class VADDetector:
         读取一帧音频数据.
         """
         try:
-            if not self.stream or not self.stream.is_active():
+            if not self.stream or not self.stream.active:
                 return None
 
             # 读取音频数据

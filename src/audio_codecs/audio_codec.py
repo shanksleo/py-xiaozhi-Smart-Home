@@ -316,11 +316,17 @@ class AudioCodec:
 
         try:
             if is_input:
+                logger.info(f"重新初始化输入流前 - 当前流状态: {self.input_stream.active if self.input_stream else 'None'}")
+                logger.info(f"输入缓冲区大小: {self._input_buffer.qsize()}")
+                logger.info(f"输入暂停状态: {self._is_input_paused}")
+                
                 # 重建输入流
                 if self.input_stream:
+                    logger.info("停止并关闭现有输入流")
                     self.input_stream.stop()
                     self.input_stream.close()
 
+                logger.info(f"创建新的输入流 - 采样率: {self.device_input_sample_rate}, 帧大小: {self._device_input_frame_size}")
                 self.input_stream = sd.InputStream(
                     samplerate=self.device_input_sample_rate,
                     channels=AudioConfig.CHANNELS,
@@ -331,7 +337,7 @@ class AudioCodec:
                     latency="low",
                 )
                 self.input_stream.start()
-                logger.info("输入流重新初始化成功")
+                logger.info(f"输入流重新初始化完成 - 新流状态: {self.input_stream.active}")
                 return True
             else:
                 # 重建输出流
@@ -363,17 +369,31 @@ class AudioCodec:
         """
         暂停音频输入.
         """
+        logger.info(f"暂停音频输入前 - 输入流状态: {self.input_stream.active if self.input_stream else 'None'}")
+        logger.info(f"输入缓冲区大小: {self._input_buffer.qsize()}")
+        logger.info(f"唤醒词缓冲区大小: {self._wake_word_buffer.qsize()}")
+        
         self._is_input_paused = True
         # 暂停输入的同时清空输入缓冲区
         self._clear_queue(self._input_buffer)
         logger.info("音频输入已暂停并清空缓冲区")
+        
+        logger.info(f"暂停音频输入后 - 输入流状态: {self.input_stream.active if self.input_stream else 'None'}")
+        logger.info(f"清空后输入缓冲区大小: {self._input_buffer.qsize()}")
 
     async def resume_input(self):
         """
         恢复音频输入.
         """
+        logger.info(f"恢复音频输入前 - 输入流状态: {self.input_stream.active if self.input_stream else 'None'}")
+        logger.info(f"输入暂停状态: {self._is_input_paused}")
+        logger.info(f"输入缓冲区大小: {self._input_buffer.qsize()}")
+        
         self._is_input_paused = False
         logger.info("音频输入已恢复")
+        
+        logger.info(f"恢复音频输入后 - 输入流状态: {self.input_stream.active if self.input_stream else 'None'}")
+        logger.info(f"输入暂停状态: {self._is_input_paused}")
 
     def is_input_paused(self):
         """
@@ -396,12 +416,14 @@ class AudioCodec:
         读取音频数据并编码.
         """
         if self.is_input_paused():
+            logger.debug("音频输入已暂停，跳过读取")
             return None
 
         try:
             # 直接处理单帧数据，避免浪费
             try:
                 audio_data = self._input_buffer.get_nowait()
+                logger.debug(f"成功从输入缓冲区读取音频数据，缓冲区剩余: {self._input_buffer.qsize()}")
 
                 # 严格验证数据长度
                 if len(audio_data) != AudioConfig.INPUT_FRAME_SIZE:
@@ -412,9 +434,12 @@ class AudioCodec:
 
                 # 转换为bytes并编码
                 pcm_data = audio_data.astype(np.int16).tobytes()
-                return self.opus_encoder.encode(pcm_data, AudioConfig.INPUT_FRAME_SIZE)
+                encoded_data = self.opus_encoder.encode(pcm_data, AudioConfig.INPUT_FRAME_SIZE)
+                logger.debug(f"音频编码成功，编码后大小: {len(encoded_data)} bytes")
+                return encoded_data
 
             except asyncio.QueueEmpty:
+                logger.debug("输入缓冲区为空，无音频数据可读取")
                 return None
 
         except Exception as e:
@@ -485,46 +510,61 @@ class AudioCodec:
         """
         清空音频队列.
         """
+        logger.info("开始清空音频队列")
         cleared_count = 0
+        queue_sizes = {}
 
         # 清空所有队列
         queues_to_clear = [
-            self.audio_decode_queue,
-            self._input_buffer,
-            self._output_buffer,
-            self._wake_word_buffer,
+            ("audio_decode_queue", self.audio_decode_queue),
+            ("input_buffer", self._input_buffer),
+            ("output_buffer", self._output_buffer),
+            ("wake_word_buffer", self._wake_word_buffer),
         ]
 
-        for queue in queues_to_clear:
+        for queue_name, queue in queues_to_clear:
+            initial_size = queue.qsize()
+            queue_sizes[queue_name] = initial_size
+            queue_cleared = 0
             while not queue.empty():
                 try:
                     queue.get_nowait()
+                    queue_cleared += 1
                     cleared_count += 1
                 except asyncio.QueueEmpty:
                     break
+            logger.info(f"清空{queue_name}: {queue_cleared}帧 (原大小: {initial_size})")
 
         # 清空重采样缓冲区
+        resample_buffer_size = 0
         if self._resample_input_buffer:
-            cleared_count += len(self._resample_input_buffer)
+            resample_buffer_size = len(self._resample_input_buffer)
+            cleared_count += resample_buffer_size
             self._resample_input_buffer.clear()
+            logger.info(f"清空重采样缓冲区: {resample_buffer_size}帧")
 
         # 额外等待一小段时间，确保正在处理的音频数据完成
         await asyncio.sleep(0.01)
 
         # 再次清空可能新产生的数据
         extra_cleared = 0
-        for queue in [self._input_buffer, self._wake_word_buffer]:
+        for queue_name, queue in [("input_buffer", self._input_buffer), ("wake_word_buffer", self._wake_word_buffer)]:
+            extra_count = 0
             while not queue.empty():
                 try:
                     queue.get_nowait()
+                    extra_count += 1
                     extra_cleared += 1
                 except asyncio.QueueEmpty:
                     break
+            if extra_count > 0:
+                logger.info(f"二次清空{queue_name}: {extra_count}帧")
 
         cleared_count += extra_cleared
 
-        if cleared_count > 0:
-            logger.info(f"清空音频队列，丢弃 {cleared_count} 帧音频数据")
+        logger.info(f"音频队列清空完成，总共丢弃 {cleared_count} 帧音频数据")
+        logger.info(f"清空前队列状态: {queue_sizes}")
+        logger.info(f"清空后队列状态: input_buffer={self._input_buffer.qsize()}, wake_word_buffer={self._wake_word_buffer.qsize()}")
 
     async def start_streams(self):
         """
