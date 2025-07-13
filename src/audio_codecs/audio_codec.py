@@ -62,9 +62,36 @@ class AudioCodec:
         初始化音频设备和编解码器.
         """
         try:
+            # 检查并设置默认设备
+            logger.info("开始检查可用音频设备...")
+            devices = sd.query_devices()
+            logger.info(f"找到 {len(devices)} 个音频设备")
+            
+            # 查找可用的输入和输出设备
+            input_device = None
+            output_device = None
+            
+            for i, device in enumerate(devices):
+                logger.debug(f"设备 {i}: {device['name']}, 输入通道: {device['max_input_channels']}, 输出通道: {device['max_output_channels']}")
+                if device['max_input_channels'] > 0 and input_device is None:
+                    input_device = i
+                    logger.info(f"选择输入设备 {i}: {device['name']}")
+                if device['max_output_channels'] > 0 and output_device is None:
+                    output_device = i
+                    logger.info(f"选择输出设备 {i}: {device['name']}")
+            
+            if input_device is None:
+                raise RuntimeError("未找到可用的音频输入设备（麦克风）")
+            if output_device is None:
+                raise RuntimeError("未找到可用的音频输出设备（扬声器）")
+            
+            # 设置默认设备
+            sd.default.device = [input_device, output_device]
+            logger.info(f"设置默认设备: 输入={input_device}, 输出={output_device}")
+            
             # 获取设备默认采样率
-            input_device_info = sd.query_devices(sd.default.device[0])
-            output_device_info = sd.query_devices(sd.default.device[1])
+            input_device_info = sd.query_devices(input_device)
+            output_device_info = sd.query_devices(output_device)
 
             self.device_input_sample_rate = int(input_device_info["default_samplerate"])
             self.device_output_sample_rate = int(
