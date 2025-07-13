@@ -69,14 +69,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 try:
     import numpy as np
     import sounddevice as sd
-    from scipy import signal
-    from scipy.fft import fft, fftfreq
     import matplotlib.pyplot as plt
     import matplotlib
     matplotlib.use('Agg')  # 无头环境支持
 except ImportError as e:
     print(f"缺少必要依赖: {e}")
-    print("请运行: pip install numpy sounddevice scipy matplotlib")
+    print("请运行: pip install numpy sounddevice matplotlib")
     sys.exit(1)
 
 # 可选依赖
@@ -455,8 +453,8 @@ class USBAudioRecorder:
         """计算总谐波失真"""
         try:
             # 进行FFT分析
-            fft_data = fft(signal)
-            freqs = fftfreq(len(signal), 1/sample_rate)
+            fft_data = np.fft.fft(signal)
+            freqs = np.fft.fftfreq(len(signal), 1/sample_rate)
             
             # 找到基频
             magnitude = np.abs(fft_data)
@@ -488,9 +486,9 @@ class USBAudioRecorder:
         try:
             # 对齐信号长度
             min_len = min(len(original), len(recorded))
-            orig_fft = fft(original[:min_len])
-            rec_fft = fft(recorded[:min_len])
-            freqs = fftfreq(min_len, 1/sample_rate)
+            orig_fft = np.fft.fft(original[:min_len])
+            rec_fft = np.fft.fft(recorded[:min_len])
+            freqs = np.fft.fftfreq(min_len, 1/sample_rate)
             
             # 计算传递函数
             transfer_function = rec_fft / (orig_fft + 1e-10)  # 避免除零
@@ -792,9 +790,9 @@ class AudioSignalGenerator:
         white_noise = np.random.normal(0, 1, samples)
         
         # 应用1/f滤波器近似粉红噪声
-        # 简化实现：使用低通滤波
-        b, a = signal.butter(1, 0.1, btype='low')
-        pink_noise = signal.filtfilt(b, a, white_noise)
+        # 简化实现：使用简单的移动平均滤波器
+        window_size = max(1, int(len(white_noise) * 0.01))  # 1%的窗口大小
+        pink_noise = np.convolve(white_noise, np.ones(window_size)/window_size, mode='same')
         
         # 归一化
         pink_noise = amplitude * pink_noise / np.max(np.abs(pink_noise))
