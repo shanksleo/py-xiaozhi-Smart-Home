@@ -1,0 +1,131 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .class-box { fill: #f0f8ff; stroke: #4682b4; stroke-width: 2; }
+      .class-title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .class-method { font-family: Arial, sans-serif; font-size: 11px; text-anchor: start; }
+      .class-attribute { font-family: Arial, sans-serif; font-size: 10px; text-anchor: start; fill: #666; }
+      .connection { stroke: #333; stroke-width: 1.5; fill: none; }
+      .arrow { fill: #333; }
+    </style>
+  </defs>
+  
+  <!-- TestUSBAudioComprehensive 主测试类 -->
+  <rect x="300" y="20" width="200" height="120" class="class-box"/>
+  <text x="400" y="40" class="class-title">TestUSBAudioComprehensive</text>
+  <line x1="300" y1="45" x2="500" y2="45" stroke="#4682b4" stroke-width="1"/>
+  <text x="310" y="60" class="class-method">+ setUpClass()</text>
+  <text x="310" y="75" class="class-method">+ tearDownClass()</text>
+  <text x="310" y="90" class="class-method">+ test_usb_device_detection()</text>
+  <text x="310" y="105" class="class-method">+ test_usb_microphone_recording()</text>
+  <text x="310" y="120" class="class-method">+ test_usb_speaker_playback()</text>
+  <text x="310" y="135" class="class-method">+ test_stress_test()</text>
+  
+  <!-- USBDeviceDetector 设备检测器 -->
+  <rect x="50" y="200" width="180" height="100" class="class-box"/>
+  <text x="140" y="220" class="class-title">USBDeviceDetector</text>
+  <line x1="50" y1="225" x2="230" y2="225" stroke="#4682b4" stroke-width="1"/>
+  <text x="60" y="240" class="class-method">+ detect_usb_audio_devices()</text>
+  <text x="60" y="255" class="class-method">+ get_device_capabilities()</text>
+  <text x="60" y="270" class="class-method">+ validate_device_compatibility()</text>
+  <text x="60" y="285" class="class-method">- _is_usb_audio_device()</text>
+  
+  <!-- AudioSignalGenerator 信号生成器 -->
+  <rect x="280" y="200" width="180" height="100" class="class-box"/>
+  <text x="370" y="220" class="class-title">AudioSignalGenerator</text>
+  <line x1="280" y1="225" x2="460" y2="225" stroke="#4682b4" stroke-width="1"/>
+  <text x="290" y="240" class="class-method">+ generate_test_tone()</text>
+  <text x="290" y="255" class="class-method">+ generate_frequency_sweep()</text>
+  <text x="290" y="270" class="class-method">+ generate_noise_signal()</text>
+  <text x="290" y="285" class="class-method">+ generate_impulse_response()</text>
+  
+  <!-- USBAudioRecorder 录音器 -->
+  <rect x="510" y="200" width="180" height="100" class="class-box"/>
+  <text x="600" y="220" class="class-title">USBAudioRecorder</text>
+  <line x1="510" y1="225" x2="690" y2="225" stroke="#4682b4" stroke-width="1"/>
+  <text x="520" y="240" class="class-method">+ record_with_quality_analysis()</text>
+  <text x="520" y="255" class="class-method">+ measure_latency()</text>
+  <text x="520" y="270" class="class-method">+ analyze_frequency_response()</text>
+  <text x="520" y="285" class="class-method">+ calculate_snr()</text>
+  
+  <!-- USBAudioPlayer 播放器 -->
+  <rect x="50" y="350" width="180" height="100" class="class-box"/>
+  <text x="140" y="370" class="class-title">USBAudioPlayer</text>
+  <line x1="50" y1="375" x2="230" y2="375" stroke="#4682b4" stroke-width="1"/>
+  <text x="60" y="390" class="class-method">+ play_test_signal()</text>
+  <text x="60" y="405" class="class-method">+ measure_output_quality()</text>
+  <text x="60" y="420" class="class-method">+ test_frequency_response()</text>
+  <text x="60" y="435" class="class-method">+ test_amplitude_linearity()</text>
+  
+  <!-- AudioQualityMetrics 质量指标 -->
+  <rect x="280" y="350" width="180" height="120" class="class-box"/>
+  <text x="370" y="370" class="class-title">AudioQualityMetrics</text>
+  <line x1="280" y1="375" x2="460" y2="375" stroke="#4682b4" stroke-width="1"/>
+  <text x="290" y="390" class="class-attribute">+ snr: float</text>
+  <text x="290" y="405" class="class-attribute">+ thd: float</text>
+  <text x="290" y="420" class="class-attribute">+ frequency_response: List</text>
+  <text x="290" y="435" class="class-attribute">+ dynamic_range: float</text>
+  <text x="290" y="450" class="class-attribute">+ latency: float</text>
+  <text x="290" y="465" class="class-method">+ calculate_overall_score()</text>
+  
+  <!-- USBAudioFileManager 文件管理器 -->
+  <rect x="510" y="350" width="180" height="100" class="class-box"/>
+  <text x="600" y="370" class="class-title">USBAudioFileManager</text>
+  <line x1="510" y1="375" x2="690" y2="375" stroke="#4682b4" stroke-width="1"/>
+  <text x="520" y="390" class="class-method">+ save_test_results()</text>
+  <text x="520" y="405" class="class-method">+ load_test_results()</text>
+  <text x="520" y="420" class="class-method">+ generate_html_report()</text>
+  <text x="520" y="435" class="class-method">+ cleanup_test_files()</text>
+  
+  <!-- DeviceInfo 数据类 -->
+  <rect x="50" y="500" width="150" height="80" class="class-box"/>
+  <text x="125" y="520" class="class-title">DeviceInfo</text>
+  <line x1="50" y1="525" x2="200" y2="525" stroke="#4682b4" stroke-width="1"/>
+  <text x="60" y="540" class="class-attribute">+ id: int</text>
+  <text x="60" y="555" class="class-attribute">+ name: str</text>
+  <text x="60" y="570" class="class-attribute">+ capabilities: dict</text>
+  
+  <!-- TestResult 测试结果 -->
+  <rect x="250" y="500" width="150" height="80" class="class-box"/>
+  <text x="325" y="520" class="class-title">TestResult</text>
+  <line x1="250" y1="525" x2="400" y2="525" stroke="#4682b4" stroke-width="1"/>
+  <text x="260" y="540" class="class-attribute">+ device_id: int</text>
+  <text x="260" y="555" class="class-attribute">+ test_type: str</text>
+  <text x="260" y="570" class="class-attribute">+ result: bool</text>
+  
+  <!-- USBTestConfig 配置类 -->
+  <rect x="450" y="500" width="150" height="80" class="class-box"/>
+  <text x="525" y="520" class="class-title">USBTestConfig</text>
+  <line x1="450" y1="525" x2="600" y2="525" stroke="#4682b4" stroke-width="1"/>
+  <text x="460" y="540" class="class-attribute">+ SAMPLE_RATES: List</text>
+  <text x="460" y="555" class="class-attribute">+ QUALITY_THRESHOLDS: dict</text>
+  <text x="460" y="570" class="class-attribute">+ TEST_DURATION: float</text>
+  
+  <!-- 连接线 -->
+  <!-- 主测试类到各个组件 -->
+  <line x1="350" y1="140" x2="140" y2="200" class="connection"/>
+  <polygon points="140,200 145,195 145,205" class="arrow"/>
+  
+  <line x1="400" y1="140" x2="370" y2="200" class="connection"/>
+  <polygon points="370,200 375,195 375,205" class="arrow"/>
+  
+  <line x1="450" y1="140" x2="600" y2="200" class="connection"/>
+  <polygon points="600,200 605,195 605,205" class="arrow"/>
+  
+  <line x1="350" y1="140" x2="140" y2="350" class="connection"/>
+  <polygon points="140,350 145,345 145,355" class="arrow"/>
+  
+  <line x1="400" y1="140" x2="370" y2="350" class="connection"/>
+  <polygon points="370,350 375,345 375,355" class="arrow"/>
+  
+  <line x1="450" y1="140" x2="600" y2="350" class="connection"/>
+  <polygon points="600,350 605,345 605,355" class="arrow"/>
+  
+  <!-- 数据类连接 -->
+  <line x1="140" y1="300" x2="125" y2="500" class="connection" stroke-dasharray="5,5"/>
+  <line x1="370" y1="470" x2="325" y2="500" class="connection" stroke-dasharray="5,5"/>
+  <line x1="400" y1="140" x2="525" y2="500" class="connection" stroke-dasharray="5,5"/>
+  
+  <!-- 标题 -->
+  <text x="400" y="15" class="class-title" font-size="16">USB音频测试系统类图</text>
+</svg>

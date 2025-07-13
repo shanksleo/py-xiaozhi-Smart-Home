@@ -1,0 +1,148 @@
+<svg width="800" height="900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .start-end { fill: #ff6b6b; stroke: #d63031; stroke-width: 2; }
+      .process { fill: #74b9ff; stroke: #0984e3; stroke-width: 2; }
+      .decision { fill: #fdcb6e; stroke: #e17055; stroke-width: 2; }
+      .data { fill: #a29bfe; stroke: #6c5ce7; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 11px; text-anchor: middle; }
+      .small-text { font-family: Arial, sans-serif; font-size: 9px; text-anchor: middle; }
+      .arrow { stroke: #2d3436; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .yes-no { font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2d3436"/>
+    </marker>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="400" y="20" class="text" font-size="16" font-weight="bold">USB音频设备测试流程图</text>
+  
+  <!-- 开始 -->
+  <ellipse cx="400" cy="60" rx="50" ry="20" class="start-end"/>
+  <text x="400" y="65" class="text" fill="white">开始测试</text>
+  
+  <!-- 初始化系统 -->
+  <rect x="330" y="100" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="115" class="text" fill="white">初始化测试系统</text>
+  <text x="400" y="130" class="small-text" fill="white">setup_logging(), 加载配置</text>
+  
+  <!-- 检测USB设备 -->
+  <rect x="330" y="170" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="185" class="text" fill="white">检测USB音频设备</text>
+  <text x="400" y="200" class="small-text" fill="white">detect_usb_audio_devices()</text>
+  
+  <!-- 判断是否发现设备 -->
+  <polygon points="400,240 450,260 400,280 350,260" class="decision"/>
+  <text x="400" y="260" class="text">发现设备?</text>
+  
+  <!-- 记录错误并退出 -->
+  <rect x="150" y="240" width="120" height="40" rx="5" class="data"/>
+  <text x="210" y="255" class="text" fill="white">记录错误信息</text>
+  <text x="210" y="270" class="small-text" fill="white">无USB音频设备</text>
+  
+  <!-- 获取设备能力 -->
+  <rect x="330" y="320" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="335" class="text" fill="white">获取设备能力</text>
+  <text x="400" y="350" class="small-text" fill="white">get_device_capabilities()</text>
+  
+  <!-- 设备兼容性验证 -->
+  <rect x="330" y="390" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="405" class="text" fill="white">设备兼容性验证</text>
+  <text x="400" y="420" class="small-text" fill="white">validate_compatibility()</text>
+  
+  <!-- 判断兼容性 -->
+  <polygon points="400,460 450,480 400,500 350,480" class="decision"/>
+  <text x="400" y="480" class="text">兼容性OK?</text>
+  
+  <!-- 记录兼容性问题 -->
+  <rect x="550" y="460" width="120" height="40" rx="5" class="data"/>
+  <text x="610" y="475" class="text" fill="white">记录兼容性问题</text>
+  <text x="610" y="490" class="small-text" fill="white">部分功能受限</text>
+  
+  <!-- 麦克风录音测试 -->
+  <rect x="330" y="540" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="555" class="text" fill="white">麦克风录音测试</text>
+  <text x="400" y="570" class="small-text" fill="white">record_with_analysis()</text>
+  
+  <!-- 音频质量分析 -->
+  <rect x="330" y="610" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="625" class="text" fill="white">音频质量分析</text>
+  <text x="400" y="640" class="small-text" fill="white">SNR, THD, 频率响应</text>
+  
+  <!-- 扬声器播放测试 -->
+  <rect x="330" y="680" width="140" height="40" rx="5" class="process"/>
+  <text x="400" y="695" class="text" fill="white">扬声器播放测试</text>
+  <text x="400" y="710" class="small-text" fill="white">play_test_signal()</text>
+  
+  <!-- 频率响应测试 -->
+  <rect x="150" y="750" width="120" height="40" rx="5" class="process"/>
+  <text x="210" y="765" class="text" fill="white">频率响应测试</text>
+  <text x="210" y="780" class="small-text" fill="white">20Hz-20kHz扫频</text>
+  
+  <!-- 延迟测试 -->
+  <rect x="330" y="750" width="120" height="40" rx="5" class="process"/>
+  <text x="390" y="765" class="text" fill="white">延迟测试</text>
+  <text x="390" y="780" class="small-text" fill="white">measure_latency()</text>
+  
+  <!-- 压力测试 -->
+  <rect x="510" y="750" width="120" height="40" rx="5" class="process"/>
+  <text x="570" y="765" class="text" fill="white">压力测试</text>
+  <text x="570" y="780" class="small-text" fill="white">长时间稳定性</text>
+  
+  <!-- 生成测试报告 -->
+  <rect x="330" y="820" width="140" height="40" rx="5" class="data"/>
+  <text x="400" y="835" class="text" fill="white">生成测试报告</text>
+  <text x="400" y="850" class="small-text" fill="white">HTML报告和图表</text>
+  
+  <!-- 结束 -->
+  <ellipse cx="400" cy="890" rx="50" ry="20" class="start-end"/>
+  <text x="400" y="895" class="text" fill="white">结束测试</text>
+  
+  <!-- 连接线和箭头 -->
+  <!-- 主流程 -->
+  <line x1="400" y1="80" x2="400" y2="100" class="arrow"/>
+  <line x1="400" y1="140" x2="400" y2="170" class="arrow"/>
+  <line x1="400" y1="210" x2="400" y2="240" class="arrow"/>
+  <line x1="400" y1="280" x2="400" y2="320" class="arrow"/>
+  <line x1="400" y1="360" x2="400" y2="390" class="arrow"/>
+  <line x1="400" y1="430" x2="400" y2="460" class="arrow"/>
+  <line x1="400" y1="500" x2="400" y2="540" class="arrow"/>
+  <line x1="400" y1="580" x2="400" y2="610" class="arrow"/>
+  <line x1="400" y1="650" x2="400" y2="680" class="arrow"/>
+  <line x1="400" y1="720" x2="400" y2="750" class="arrow"/>
+  <line x1="400" y1="790" x2="400" y2="820" class="arrow"/>
+  <line x1="400" y1="860" x2="400" y2="870" class="arrow"/>
+  
+  <!-- 分支流程 -->
+  <!-- 无设备分支 -->
+  <line x1="350" y1="260" x2="270" y2="260" class="arrow"/>
+  <text x="310" y="255" class="yes-no" fill="red">否</text>
+  <line x1="210" y1="280" x2="210" y2="890" class="arrow" stroke-dasharray="5,5"/>
+  
+  <!-- 兼容性问题分支 -->
+  <line x1="450" y1="480" x2="550" y2="480" class="arrow"/>
+  <text x="500" y="475" class="yes-no" fill="orange">否</text>
+  <line x1="610" y1="500" x2="610" y2="820" class="arrow" stroke-dasharray="5,5"/>
+  <line x1="610" y1="820" x2="470" y2="820" class="arrow" stroke-dasharray="5,5"/>
+  
+  <!-- 并行测试分支 -->
+  <line x1="330" y1="770" x2="270" y2="770" class="arrow"/>
+  <line x1="450" y1="770" x2="510" y2="770" class="arrow"/>
+  <line x1="210" y1="790" x2="210" y2="820" class="arrow"/>
+  <line x1="210" y1="820" x2="330" y2="820" class="arrow"/>
+  <line x1="570" y1="790" x2="570" y2="820" class="arrow"/>
+  <line x1="570" y1="820" x2="470" y2="820" class="arrow"/>
+  
+  <!-- 标签 -->
+  <text x="420" y="305" class="yes-no" fill="green">是</text>
+  <text x="420" y="525" class="yes-no" fill="green">是</text>
+  
+  <!-- 循环指示 -->
+  <rect x="20" y="320" width="760" height="470" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="25" y="335" class="small-text" font-weight="bold">循环处理每个检测到的USB音频设备</text>
+  
+  <!-- 并行处理指示 -->
+  <rect x="120" y="730" width="520" height="80" fill="none" stroke="#666" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="125" y="745" class="small-text" font-weight="bold">并行执行多项测试</text>
+</svg>

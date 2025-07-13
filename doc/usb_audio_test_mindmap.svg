@@ -1,0 +1,209 @@
+<svg width="1000" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .central-node { fill: #ff6b6b; stroke: #d63031; stroke-width: 3; }
+      .main-branch { fill: #74b9ff; stroke: #0984e3; stroke-width: 2; }
+      .sub-branch { fill: #a29bfe; stroke: #6c5ce7; stroke-width: 2; }
+      .leaf-node { fill: #fdcb6e; stroke: #e17055; stroke-width: 1; }
+      .tech-node { fill: #00b894; stroke: #00a085; stroke-width: 2; }
+      .central-text { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; fill: white; }
+      .main-text { font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; text-anchor: middle; fill: white; }
+      .sub-text { font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; text-anchor: middle; fill: white; }
+      .leaf-text { font-family: Arial, sans-serif; font-size: 9px; text-anchor: middle; }
+      .connection { stroke: #636e72; stroke-width: 2; fill: none; }
+      .sub-connection { stroke: #b2bec3; stroke-width: 1.5; fill: none; }
+    </style>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="500" y="20" class="central-text" font-size="16">USB音频设备测试系统架构思维导图</text>
+  
+  <!-- 中心节点 -->
+  <ellipse cx="500" cy="400" rx="80" ry="40" class="central-node"/>
+  <text x="500" y="395" class="central-text">USB音频</text>
+  <text x="500" y="410" class="central-text">测试系统</text>
+  
+  <!-- 主要分支 -->
+  
+  <!-- 1. 设备检测模块 (左上) -->
+  <ellipse cx="200" cy="200" rx="70" ry="30" class="main-branch"/>
+  <text x="200" y="195" class="main-text">设备检测</text>
+  <text x="200" y="210" class="main-text">模块</text>
+  <line x1="420" y1="380" x2="270" y2="230" class="connection"/>
+  
+  <!-- 设备检测子分支 -->
+  <ellipse cx="80" cy="120" rx="50" ry="20" class="sub-branch"/>
+  <text x="80" y="125" class="sub-text">USB设备枚举</text>
+  <line x1="130" y1="180" x2="130" y2="140" class="sub-connection"/>
+  
+  <ellipse cx="200" cy="100" rx="50" ry="20" class="sub-branch"/>
+  <text x="200" y="105" class="sub-text">设备能力查询</text>
+  <line x1="200" y1="170" x2="200" y2="120" class="sub-connection"/>
+  
+  <ellipse cx="320" cy="120" rx="50" ry="20" class="sub-branch"/>
+  <text x="320" y="125" class="sub-text">兼容性验证</text>
+  <line x1="270" y1="180" x2="270" y2="140" class="sub-connection"/>
+  
+  <!-- 设备检测叶子节点 -->
+  <rect x="30" y="60" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="80" y="77" class="leaf-text">detect_usb_audio_devices()</text>
+  <line x1="80" y1="100" x2="80" y2="85" class="sub-connection"/>
+  
+  <rect x="150" y="40" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="200" y="57" class="leaf-text">get_device_capabilities()</text>
+  <line x1="200" y1="80" x2="200" y2="65" class="sub-connection"/>
+  
+  <rect x="270" y="60" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="320" y="77" class="leaf-text">validate_compatibility()</text>
+  <line x1="320" y1="100" x2="320" y2="85" class="sub-connection"/>
+  
+  <!-- 2. 信号生成模块 (右上) -->
+  <ellipse cx="800" cy="200" rx="70" ry="30" class="main-branch"/>
+  <text x="800" y="195" class="main-text">信号生成</text>
+  <text x="800" y="210" class="main-text">模块</text>
+  <line x1="580" y1="380" x2="730" y2="230" class="connection"/>
+  
+  <!-- 信号生成子分支 -->
+  <ellipse cx="700" cy="100" rx="45" ry="20" class="sub-branch"/>
+  <text x="700" y="105" class="sub-text">测试音调</text>
+  <line x1="730" y1="180" x2="730" y2="120" class="sub-connection"/>
+  
+  <ellipse cx="800" cy="80" rx="45" ry="20" class="sub-branch"/>
+  <text x="800" y="85" class="sub-text">扫频信号</text>
+  <line x1="800" y1="170" x2="800" y2="100" class="sub-connection"/>
+  
+  <ellipse cx="900" cy="100" rx="45" ry="20" class="sub-branch"/>
+  <text x="900" y="105" class="sub-text">噪声信号</text>
+  <line x1="870" y1="180" x2="870" y2="120" class="sub-connection"/>
+  
+  <!-- 信号生成叶子节点 -->
+  <rect x="650" y="40" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="700" y="57" class="leaf-text">generate_test_tone()</text>
+  <line x1="700" y1="80" x2="700" y2="65" class="sub-connection"/>
+  
+  <rect x="750" y="20" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="800" y="37" class="leaf-text">generate_frequency_sweep()</text>
+  <line x1="800" y1="60" x2="800" y2="45" class="sub-connection"/>
+  
+  <rect x="850" y="40" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="900" y="57" class="leaf-text">generate_noise_signal()</text>
+  <line x1="900" y1="80" x2="900" y2="65" class="sub-connection"/>
+  
+  <!-- 3. 录音测试模块 (左下) -->
+  <ellipse cx="200" cy="600" rx="70" ry="30" class="main-branch"/>
+  <text x="200" y="595" class="main-text">录音测试</text>
+  <text x="200" y="610" class="main-text">模块</text>
+  <line x1="420" y1="420" x2="270" y2="570" class="connection"/>
+  
+  <!-- 录音测试子分支 -->
+  <ellipse cx="80" cy="700" rx="50" ry="20" class="sub-branch"/>
+  <text x="80" y="705" class="sub-text">质量分析</text>
+  <line x1="130" y1="630" x2="130" y2="680" class="sub-connection"/>
+  
+  <ellipse cx="200" cy="720" rx="50" ry="20" class="sub-branch"/>
+  <text x="200" y="725" class="sub-text">延迟测量</text>
+  <line x1="200" y1="630" x2="200" y2="700" class="sub-connection"/>
+  
+  <ellipse cx="320" cy="700" rx="50" ry="20" class="sub-branch"/>
+  <text x="320" y="705" class="sub-text">频率响应</text>
+  <line x1="270" y1="630" x2="270" y2="680" class="sub-connection"/>
+  
+  <!-- 录音测试叶子节点 -->
+  <rect x="30" y="740" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="80" y="757" class="leaf-text">calculate_snr()</text>
+  <line x1="80" y1="720" x2="80" y2="740" class="sub-connection"/>
+  
+  <rect x="150" y="760" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="200" y="777" class="leaf-text">measure_latency()</text>
+  <line x1="200" y1="740" x2="200" y2="760" class="sub-connection"/>
+  
+  <rect x="270" y="740" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="320" y="757" class="leaf-text">analyze_frequency_response()</text>
+  <line x1="320" y1="720" x2="320" y2="740" class="sub-connection"/>
+  
+  <!-- 4. 播放测试模块 (右下) -->
+  <ellipse cx="800" cy="600" rx="70" ry="30" class="main-branch"/>
+  <text x="800" y="595" class="main-text">播放测试</text>
+  <text x="800" y="610" class="main-text">模块</text>
+  <line x1="580" y1="420" x2="730" y2="570" class="connection"/>
+  
+  <!-- 播放测试子分支 -->
+  <ellipse cx="700" cy="720" rx="50" ry="20" class="sub-branch"/>
+  <text x="700" y="725" class="sub-text">信号播放</text>
+  <line x1="730" y1="630" x2="730" y2="700" class="sub-connection"/>
+  
+  <ellipse cx="800" cy="740" rx="50" ry="20" class="sub-branch"/>
+  <text x="800" y="745" class="sub-text">输出质量</text>
+  <line x1="800" y1="630" x2="800" y2="720" class="sub-connection"/>
+  
+  <ellipse cx="900" cy="720" rx="50" ry="20" class="sub-branch"/>
+  <text x="900" y="725" class="sub-text">线性度测试</text>
+  <line x1="870" y1="630" x2="870" y2="700" class="sub-connection"/>
+  
+  <!-- 播放测试叶子节点 -->
+  <rect x="650" y="760" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="700" y="777" class="leaf-text">play_test_signal()</text>
+  <line x1="700" y1="740" x2="700" y2="760" class="sub-connection"/>
+  
+  <rect x="750" y="780" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="800" y="797" class="leaf-text">measure_output_quality()</text>
+  <line x1="800" y1="760" x2="800" y2="780" class="sub-connection"/>
+  
+  <rect x="850" y="760" width="100" height="25" rx="3" class="leaf-node"/>
+  <text x="900" y="777" class="leaf-text">test_amplitude_linearity()</text>
+  <line x1="900" y1="740" x2="900" y2="760" class="sub-connection"/>
+  
+  <!-- 5. 技术栈模块 (上方) -->
+  <ellipse cx="500" cy="150" rx="60" ry="25" class="tech-node"/>
+  <text x="500" y="155" class="main-text">技术栈</text>
+  <line x1="500" y1="360" x2="500" y2="175" class="connection"/>
+  
+  <!-- 技术栈子分支 -->
+  <ellipse cx="400" cy="80" rx="40" ry="15" class="sub-branch"/>
+  <text x="400" y="85" class="sub-text">SoundDevice</text>
+  <line x1="460" y1="130" x2="440" y2="95" class="sub-connection"/>
+  
+  <ellipse cx="500" cy="60" rx="30" ry="15" class="sub-branch"/>
+  <text x="500" y="65" class="sub-text">NumPy</text>
+  <line x1="500" y1="125" x2="500" y2="75" class="sub-connection"/>
+  
+  <ellipse cx="600" cy="80" rx="30" ry="15" class="sub-branch"/>
+  <text x="600" y="85" class="sub-text">SciPy</text>
+  <line x1="540" y1="130" x2="570" y2="95" class="sub-connection"/>
+  
+  <!-- 6. 报告生成模块 (下方) -->
+  <ellipse cx="500" cy="650" rx="60" ry="25" class="tech-node"/>
+  <text x="500" y="655" class="main-text">报告生成</text>
+  <line x1="500" y1="440" x2="500" y2="625" class="connection"/>
+  
+  <!-- 报告生成子分支 -->
+  <ellipse cx="400" cy="720" rx="40" ry="15" class="sub-branch"/>
+  <text x="400" y="725" class="sub-text">HTML报告</text>
+  <line x1="460" y1="670" x2="440" y2="705" class="sub-connection"/>
+  
+  <ellipse cx="500" cy="740" rx="35" ry="15" class="sub-branch"/>
+  <text x="500" y="745" class="sub-text">图表生成</text>
+  <line x1="500" y1="675" x2="500" y2="725" class="sub-connection"/>
+  
+  <ellipse cx="600" cy="720" rx="40" ry="15" class="sub-branch"/>
+  <text x="600" y="725" class="sub-text">质量评级</text>
+  <line x1="540" y1="670" x2="560" y2="705" class="sub-connection"/>
+  
+  <!-- 质量指标标注 -->
+  <rect x="50" y="350" width="120" height="100" fill="#ddd" stroke="#999" stroke-width="1" rx="5"/>
+  <text x="110" y="370" class="sub-text" fill="black">质量指标:</text>
+  <text x="60" y="385" class="leaf-text" fill="black">• SNR (信噪比)</text>
+  <text x="60" y="400" class="leaf-text" fill="black">• THD (总谐波失真)</text>
+  <text x="60" y="415" class="leaf-text" fill="black">• 频率响应</text>
+  <text x="60" y="430" class="leaf-text" fill="black">• 动态范围</text>
+  <text x="60" y="445" class="leaf-text" fill="black">• 延迟测量</text>
+  
+  <!-- 测试类型标注 -->
+  <rect x="830" y="350" width="120" height="100" fill="#ddd" stroke="#999" stroke-width="1" rx="5"/>
+  <text x="890" y="370" class="sub-text" fill="black">测试类型:</text>
+  <text x="840" y="385" class="leaf-text" fill="black">• 设备兼容性</text>
+  <text x="840" y="400" class="leaf-text" fill="black">• 音频质量</text>
+  <text x="840" y="415" class="leaf-text" fill="black">• 性能基准</text>
+  <text x="840" y="430" class="leaf-text" fill="black">• 压力测试</text>
+  <text x="840" y="445" class="leaf-text" fill="black">• 故障诊断</text>
+</svg>
