@@ -388,38 +388,38 @@ class Application:
 
     async def _initialize_components(self, mode: str, protocol: str):
         """
-        # 初始化应用程序组件.
-        # """
-        # logger.info("正在初始化应用程序组件...")
-        #
-        # # 设置显示类型（必须在设备状态设置之前）
-        # self._set_display_type(mode)
-        #
-        # # 设置设备状态
-        # await self._set_device_state(DeviceState.IDLE)
-        #
-        # # 初始化物联网设备
-        # await self._initialize_iot_devices()
-        #
-        # # 初始化MCP服务器
-        # self._initialize_mcp_server()
+        初始化应用程序组件.
+        """
+        logger.info("正在初始化应用程序组件...")
+
+        # 设置显示类型（必须在设备状态设置之前）
+        self._set_display_type(mode)
+
+        # 设置设备状态
+        await self._set_device_state(DeviceState.IDLE)
+
+        # 初始化物联网设备
+        await self._initialize_iot_devices()
+
+        # 初始化MCP服务器
+        self._initialize_mcp_server()
 
         # 初始化音频编解码器
         await self._initialize_audio()
 
-        # # 设置协议
-        # self._set_protocol_type(protocol)
-        #
-        # # 初始化唤醒词检测
-        # await self._initialize_wake_word_detector()
-        #
-        # # 设置协议回调
-        # self._setup_protocol_callbacks()
-        #
-        # # 启动日程提醒服务
-        # await self._start_calendar_reminder_service()
-        #
-        # logger.info("应用程序组件初始化完成")
+        # 设置协议
+        self._set_protocol_type(protocol)
+
+        # 初始化唤醒词检测
+        await self._initialize_wake_word_detector()
+
+        # 设置协议回调
+        self._setup_protocol_callbacks()
+
+        # 启动日程提醒服务
+        await self._start_calendar_reminder_service()
+
+        logger.info("应用程序组件初始化完成")
 
     async def _initialize_audio(self):
         """
@@ -433,16 +433,16 @@ class Application:
             await self.audio_codec.initialize()
 
             # 注册到资源管理器
-            # resource_manager = get_resource_manager()
-            # await resource_manager.register_resource(
-            #     resource_id="audio_codec",
-            #     resource=self.audio_codec,
-            #     cleanup_func=self.audio_codec.close,
-            #     resource_type=ResourceType.AUDIO_CODEC,
-            #     name="音频编解码器",
-            #     priority=10,
-            #     is_async=True,
-            # )
+            resource_manager = get_resource_manager()
+            await resource_manager.register_resource(
+                resource_id="audio_codec",
+                resource=self.audio_codec,
+                cleanup_func=self.audio_codec.close,
+                resource_type=ResourceType.AUDIO_CODEC,
+                name="音频编解码器",
+                priority=10,
+                is_async=True,
+            )
 
             logger.info("音频编解码器初始化成功")
 
