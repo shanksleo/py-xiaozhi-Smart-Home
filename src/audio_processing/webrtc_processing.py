@@ -22,7 +22,7 @@ from ctypes import POINTER, Structure, byref, c_bool, c_float, c_int, c_short, c
 import numpy as np
 
 from src.utils.logging_config import get_logger
-from src.utils.path_resolver import find_resource
+from src.utils.resource_finder import find_file as find_resource
 
 logger = get_logger(__name__)
 
