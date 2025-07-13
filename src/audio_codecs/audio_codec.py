@@ -63,6 +63,7 @@ class AudioCodec:
         """
         try:
             # 查询所有可用设备
+            sd.wait()
             devices = sd.query_devices()
             logger.info(f"检测到 {len(devices)} 个音频设备")
             
