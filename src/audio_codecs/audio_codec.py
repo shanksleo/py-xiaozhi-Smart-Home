@@ -62,36 +62,63 @@ class AudioCodec:
         初始化音频设备和编解码器.
         """
         try:
-            # 检查并设置默认设备
-            logger.info("开始检查可用音频设备...")
+            # 查询所有可用设备
             devices = sd.query_devices()
-            logger.info(f"找到 {len(devices)} 个音频设备")
+            logger.info(f"检测到 {len(devices)} 个音频设备")
             
+            # 输出所有设备的详细信息
+            logger.debug("=== 音频设备详细信息 ===")
+            for i, device in enumerate(devices):
+                logger.debug(f"设备 {i}: {device['name']}")
+                logger.debug(f"  - 输入通道: {device['max_input_channels']}")
+                logger.debug(f"  - 输出通道: {device['max_output_channels']}")
+                logger.debug(f"  - 默认采样率: {device['default_samplerate']}")
+                logger.debug(f"  - 主机API: {device['hostapi']}")
+                logger.debug(f"  - 设备类型: {'输入' if device['max_input_channels'] > 0 else ''}{'输出' if device['max_output_channels'] > 0 else ''}")
+            logger.debug("=== 设备信息结束 ===")
+
             # 查找可用的输入和输出设备
             input_device = None
             output_device = None
+            input_candidates = []
+            output_candidates = []
             
             for i, device in enumerate(devices):
-                logger.debug(f"设备 {i}: {device['name']}, 输入通道: {device['max_input_channels']}, 输出通道: {device['max_output_channels']}")
-                if device['max_input_channels'] > 0 and input_device is None:
-                    input_device = i
-                    logger.info(f"选择输入设备 {i}: {device['name']}")
-                if device['max_output_channels'] > 0 and output_device is None:
-                    output_device = i
-                    logger.info(f"选择输出设备 {i}: {device['name']}")
+                if device['max_input_channels'] > 0:
+                    input_candidates.append((i, device['name'], device['max_input_channels']))
+                    if input_device is None:
+                        input_device = i
+                        logger.info(f"选择输入设备 {i}: {device['name']} (通道数: {device['max_input_channels']})")
+                if device['max_output_channels'] > 0:
+                    output_candidates.append((i, device['name'], device['max_output_channels']))
+                    if output_device is None:
+                        output_device = i
+                        logger.info(f"选择输出设备 {i}: {device['name']} (通道数: {device['max_output_channels']})")
+            
+            # 输出候选设备信息
+            logger.debug(f"可用输入设备候选: {input_candidates}")
+            logger.debug(f"可用输出设备候选: {output_candidates}")
             
             if input_device is None:
+                logger.error(f"未找到可用的音频输入设备！总设备数: {len(devices)}, 输入候选: {input_candidates}")
                 raise RuntimeError("未找到可用的音频输入设备（麦克风）")
             if output_device is None:
+                logger.error(f"未找到可用的音频输出设备！总设备数: {len(devices)}, 输出候选: {output_candidates}")
                 raise RuntimeError("未找到可用的音频输出设备（扬声器）")
             
             # 设置默认设备
+            logger.debug(f"准备设置默认设备: 输入={input_device}, 输出={output_device}")
             sd.default.device = [input_device, output_device]
-            logger.info(f"设置默认设备: 输入={input_device}, 输出={output_device}")
+            logger.info(f"✅ 成功设置默认设备: 输入={input_device}, 输出={output_device}")
             
             # 获取设备默认采样率
+            logger.debug(f"查询输入设备 {input_device} 的详细信息...")
             input_device_info = sd.query_devices(input_device)
+            logger.debug(f"输入设备信息: {input_device_info}")
+            
+            logger.debug(f"查询输出设备 {output_device} 的详细信息...")
             output_device_info = sd.query_devices(output_device)
+            logger.debug(f"输出设备信息: {output_device_info}")
 
             self.device_input_sample_rate = int(input_device_info["default_samplerate"])
             self.device_output_sample_rate = int(
@@ -107,35 +134,50 @@ class AudioCodec:
                 self.device_output_sample_rate * frame_duration_sec
             )
 
-            logger.info(f"设备输入采样率: {self.device_input_sample_rate}Hz")
-            logger.info(f"设备输出采样率: {self.device_output_sample_rate}Hz")
+            logger.info(f"📊 设备输入采样率: {self.device_input_sample_rate}Hz")
+            logger.info(f"📊 设备输出采样率: {self.device_output_sample_rate}Hz")
+            logger.debug(f"计算的输入帧大小: {self._device_input_frame_size}")
+            logger.debug(f"计算的输出帧大小: {self._device_output_frame_size}")
 
             # 创建重采样器
+            logger.debug("开始创建重采样器...")
             await self._create_resamplers()
+            logger.debug("✅ 重采样器创建完成")
 
             # 设置SoundDevice使用设备默认采样率
+            logger.debug("配置SoundDevice默认参数...")
             sd.default.samplerate = None  # 让设备使用默认采样率
             sd.default.channels = AudioConfig.CHANNELS
             sd.default.dtype = np.int16
+            logger.debug(f"SoundDevice配置: channels={AudioConfig.CHANNELS}, dtype=int16")
 
             # 初始化流
+            logger.debug("开始创建音频流...")
             await self._create_streams()
+            logger.debug("✅ 音频流创建完成")
 
             # 编解码器初始化 - 客户端-服务器架构
             # 编码器：16kHz发送给服务器
             # 解码器：24kHz从服务器接收
+            logger.debug("开始初始化Opus编解码器...")
+            logger.debug(f"编码器配置: {AudioConfig.INPUT_SAMPLE_RATE}Hz, {AudioConfig.CHANNELS}通道")
             self.opus_encoder = opuslib.Encoder(
                 AudioConfig.INPUT_SAMPLE_RATE,  # 16kHz
                 AudioConfig.CHANNELS,
                 opuslib.APPLICATION_AUDIO,
             )
+            logger.debug(f"解码器配置: {AudioConfig.OUTPUT_SAMPLE_RATE}Hz, {AudioConfig.CHANNELS}通道")
             self.opus_decoder = opuslib.Decoder(
                 AudioConfig.OUTPUT_SAMPLE_RATE, AudioConfig.CHANNELS  # 24kHz
             )
+            logger.debug("✅ Opus编解码器初始化完成")
 
-            logger.info("音频设备和编解码器初始化成功")
+            logger.info("🎉 音频设备和编解码器初始化成功")
         except Exception as e:
-            logger.error(f"初始化音频设备失败: {e}")
+            logger.error(f"❌ 初始化音频设备失败: {e}")
+            logger.error(f"错误类型: {type(e).__name__}")
+            import traceback
+            logger.error(f"错误堆栈: {traceback.format_exc()}")
             await self.close()
             raise
 
@@ -143,7 +185,9 @@ class AudioCodec:
         """
         创建重采样器.
         """
+        logger.debug(f"检查是否需要输入重采样: 设备采样率={self.device_input_sample_rate}Hz, 目标采样率={AudioConfig.INPUT_SAMPLE_RATE}Hz")
         if self.device_input_sample_rate != AudioConfig.INPUT_SAMPLE_RATE:
+            logger.debug("需要创建输入重采样器")
             self.input_resampler = soxr.ResampleStream(
                 self.device_input_sample_rate,
                 AudioConfig.INPUT_SAMPLE_RATE,
@@ -152,12 +196,16 @@ class AudioCodec:
                 quality="QQ",
             )
             logger.info(
-                f"创建输入重采样器: {self.device_input_sample_rate}Hz -> "
+                f"🔄 创建输入重采样器: {self.device_input_sample_rate}Hz -> "
                 f"{AudioConfig.INPUT_SAMPLE_RATE}Hz"
             )
+        else:
+            logger.debug("✅ 输入采样率匹配，无需重采样")
 
         # 输出重采样器：从Opus解码的24kHz重采样到设备采样率
+        logger.debug(f"检查是否需要输出重采样: Opus输出={AudioConfig.OUTPUT_SAMPLE_RATE}Hz, 设备采样率={self.device_output_sample_rate}Hz")
         if self.device_output_sample_rate != AudioConfig.OUTPUT_SAMPLE_RATE:
+            logger.debug("需要创建输出重采样器")
             self.output_resampler = soxr.ResampleStream(
                 AudioConfig.OUTPUT_SAMPLE_RATE,  # Opus输出24kHz
                 self.device_output_sample_rate,
@@ -166,9 +214,11 @@ class AudioCodec:
                 quality="QQ",
             )
             logger.info(
-                f"创建输出重采样器: {AudioConfig.OUTPUT_SAMPLE_RATE}Hz -> "
+                f"🔄 创建输出重采样器: {AudioConfig.OUTPUT_SAMPLE_RATE}Hz -> "
                 f"{self.device_output_sample_rate}Hz"
             )
+        else:
+            logger.debug("✅ 输出采样率匹配，无需重采样")
 
     async def _create_streams(self):
         """
@@ -176,6 +226,8 @@ class AudioCodec:
         """
         try:
             # 创建输入流（录音）
+            logger.debug("创建输入流...")
+            logger.debug(f"输入流参数: samplerate={self.device_input_sample_rate}, channels={AudioConfig.CHANNELS}, blocksize={self._device_input_frame_size}")
             self.input_stream = sd.InputStream(
                 samplerate=self.device_input_sample_rate,
                 channels=AudioConfig.CHANNELS,
@@ -185,8 +237,11 @@ class AudioCodec:
                 finished_callback=self._input_finished_callback,
                 latency="low",
             )
+            logger.debug("✅ 输入流创建成功")
 
             # 创建输出流（播放）
+            logger.debug("创建输出流...")
+            logger.debug(f"输出流参数: samplerate={self.device_output_sample_rate}, channels={AudioConfig.CHANNELS}, blocksize={self._device_output_frame_size}")
             self.output_stream = sd.OutputStream(
                 samplerate=self.device_output_sample_rate,
                 channels=AudioConfig.CHANNELS,
@@ -196,13 +251,24 @@ class AudioCodec:
                 finished_callback=self._output_finished_callback,
                 latency="low",
             )
+            logger.debug("✅ 输出流创建成功")
 
             # 启动流
+            logger.debug("启动输入流...")
             self.input_stream.start()
+            logger.debug("✅ 输入流启动成功")
+            
+            logger.debug("启动输出流...")
             self.output_stream.start()
+            logger.debug("✅ 输出流启动成功")
+            
+            logger.info("🎵 所有音频流已成功创建并启动")
 
         except Exception as e:
-            logger.error(f"创建音频流失败: {e}")
+            logger.error(f"❌ 创建音频流失败: {e}")
+            logger.error(f"错误类型: {type(e).__name__}")
+            import traceback
+            logger.error(f"错误堆栈: {traceback.format_exc()}")
             raise
 
     def _input_callback(self, indata, frames, time_info, status):
