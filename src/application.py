@@ -387,6 +387,9 @@ class Application:
             signal.signal(signal.SIGINT, lambda s, f: signal_handler())
 
     async def _initialize_components(self, mode: str, protocol: str):
+        # 初始化音频编解码器
+        await self._initialize_audio()
+
         """
         初始化应用程序组件.
         """
@@ -404,8 +407,7 @@ class Application:
         # 初始化MCP服务器
         self._initialize_mcp_server()
 
-        # 初始化音频编解码器
-        await self._initialize_audio()
+
 
         # 设置协议
         self._set_protocol_type(protocol)
