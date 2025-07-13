@@ -57,7 +57,7 @@ except ImportError as e:
     print("请运行: pip install numpy sounddevice")
     sys.exit(1)
 
-from src.utils.logging_config import setup_logging
+from src.utils.logging_config import setup_logging, get_logger
 from src.constants.constants import AudioConfig
 from src.audio_codecs.audio_codec import AudioCodec
 
@@ -89,8 +89,9 @@ class AudioGenerator:
     
     def __init__(self, sample_rate: int = TestConfig.SAMPLE_RATE):
         self.sample_rate = sample_rate
-        self.logger = setup_logging().getChild(self.__class__.__name__)
-        
+        setup_logging()
+        self.logger = get_logger(self.__class__.__name__)
+
     def generate_sine_wave(self, frequency: float, duration: float, 
                           amplitude: float = TestConfig.AMPLITUDE) -> np.ndarray:
         """生成正弦波信号
@@ -103,7 +104,7 @@ class AudioGenerator:
         Returns:
             numpy数组形式的音频数据
         """
-        self.logger.debug(f"生成正弦波: {frequency}Hz, {duration}s, 幅度{amplitude}")
+        print(f"生成正弦波: {frequency}Hz, {duration}s, 幅度{amplitude}")
         
         t = np.linspace(0, duration, int(self.sample_rate * duration), False)
         wave_data = amplitude * np.sin(2 * np.pi * frequency * t)
@@ -129,7 +130,7 @@ class AudioGenerator:
         Returns:
             numpy数组形式的音频数据
         """
-        self.logger.debug(f"生成白噪声: {duration}s, 幅度{amplitude}")
+        print(f"生成白噪声: {duration}s, 幅度{amplitude}")
         
         samples = int(self.sample_rate * duration)
         noise_data = amplitude * np.random.normal(0, 1, samples)
@@ -149,7 +150,7 @@ class AudioGenerator:
         Returns:
             numpy数组形式的音频数据
         """
-        self.logger.debug(f"生成扫频信号: {start_freq}-{end_freq}Hz, {duration}s")
+        print(f"生成扫频信号: {start_freq}-{end_freq}Hz, {duration}s")
         
         t = np.linspace(0, duration, int(self.sample_rate * duration), False)
         # 线性扫频
@@ -172,7 +173,7 @@ class AudioGenerator:
         Returns:
             numpy数组形式的音频数据
         """
-        self.logger.debug(f"生成多音调信号: {frequencies}Hz, {duration}s")
+        print(f"生成多音调信号: {frequencies}Hz, {duration}s")
         
         t = np.linspace(0, duration, int(self.sample_rate * duration), False)
         multi_tone_data = np.zeros_like(t)
@@ -193,8 +194,9 @@ class AudioFileManager:
     def __init__(self, base_dir: Path = TestConfig.TEST_AUDIO_DIR):
         self.base_dir = base_dir
         self.base_dir.mkdir(exist_ok=True)
-        self.logger = setup_logging().getChild(self.__class__.__name__)
-        
+        setup_logging()
+        self.logger = get_logger(self.__class__.__name__)
+
     def save_audio_to_wav(self, audio_data: np.ndarray, filename: str, 
                          sample_rate: int = TestConfig.SAMPLE_RATE) -> Path:
         """保存音频数据到WAV文件
@@ -209,7 +211,7 @@ class AudioFileManager:
         """
         file_path = self.base_dir / f"{filename}.wav"
         
-        self.logger.info(f"保存音频文件: {file_path}")
+        print(f"保存音频文件: {file_path}")
         
         # 转换为16位整数格式
         audio_int16 = (audio_data * 32767).astype(np.int16)
@@ -220,7 +222,7 @@ class AudioFileManager:
             wav_file.setframerate(sample_rate)
             wav_file.writeframes(audio_int16.tobytes())
             
-        self.logger.debug(f"音频文件保存成功: {file_path}, 大小: {file_path.stat().st_size} bytes")
+        print(f"音频文件保存成功: {file_path}, 大小: {file_path.stat().st_size} bytes")
         return file_path
     
     def load_audio_from_wav(self, file_path: Path) -> Tuple[np.ndarray, int]:
@@ -232,7 +234,7 @@ class AudioFileManager:
         Returns:
             (音频数据, 采样率)
         """
-        self.logger.debug(f"加载音频文件: {file_path}")
+        print(f"加载音频文件: {file_path}")
         
         with wave.open(str(file_path), 'rb') as wav_file:
             frames = wav_file.readframes(-1)
@@ -248,19 +250,19 @@ class AudioFileManager:
             # 转换为float32格式
             audio_data = audio_data.astype(np.float32) / 32767.0
             
-        self.logger.debug(f"音频加载成功: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
+        print(f"音频加载成功: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
         return audio_data, sample_rate
     
     def cleanup_test_files(self):
         """清理测试文件"""
-        self.logger.info(f"清理测试文件目录: {self.base_dir}")
+        print(f"清理测试文件目录: {self.base_dir}")
         
         for file_path in self.base_dir.glob("*.wav"):
             try:
                 file_path.unlink()
-                self.logger.debug(f"删除文件: {file_path}")
+                print(f"删除文件: {file_path}")
             except Exception as e:
-                self.logger.warning(f"删除文件失败 {file_path}: {e}")
+                print(f"删除文件失败 {file_path}: {e}")
 
 
 class AudioPlayer:
@@ -268,7 +270,8 @@ class AudioPlayer:
     
     def __init__(self, device_id: Optional[int] = None):
         self.device_id = device_id
-        self.logger = setup_logging().getChild(self.__class__.__name__)
+        setup_logging()
+        self.logger = get_logger(self.__class__.__name__)
         
     def get_available_output_devices(self) -> List[Dict[str, Any]]:
         """获取可用的输出设备列表
@@ -290,7 +293,7 @@ class AudioPlayer:
                     })
                     
         except Exception as e:
-            self.logger.error(f"获取音频设备失败: {e}")
+            print(f"获取音频设备失败: {e}")
             
         return devices
     
@@ -307,7 +310,7 @@ class AudioPlayer:
             播放是否成功
         """
         try:
-            self.logger.info(f"开始播放音频: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
+            print(f"开始播放音频: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
             
             # 确保音频数据格式正确
             if audio_data.dtype != np.float32:
@@ -317,14 +320,14 @@ class AudioPlayer:
             sd.play(audio_data, samplerate=sample_rate, device=self.device_id, blocking=blocking)
             
             if blocking:
-                self.logger.info("音频播放完成")
+                print("音频播放完成")
             else:
-                self.logger.info("音频播放已开始（非阻塞模式）")
+                print("音频播放已开始（非阻塞模式）")
                 
             return True
             
         except Exception as e:
-            self.logger.error(f"音频播放失败: {e}")
+            print(f"音频播放失败: {e}")
             return False
     
     def play_audio_file(self, file_path: Path, blocking: bool = True) -> bool:
@@ -343,16 +346,16 @@ class AudioPlayer:
             return self.play_audio_data(audio_data, sample_rate, blocking)
             
         except Exception as e:
-            self.logger.error(f"播放音频文件失败 {file_path}: {e}")
+            print(f"播放音频文件失败 {file_path}: {e}")
             return False
     
     def stop_playback(self):
         """停止播放"""
         try:
             sd.stop()
-            self.logger.info("音频播放已停止")
+            print("音频播放已停止")
         except Exception as e:
-            self.logger.warning(f"停止播放时出错: {e}")
+            print(f"停止播放时出错: {e}")
 
 
 class TestAudioSpeakerVerification(unittest.TestCase):
@@ -361,30 +364,31 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """测试类初始化"""
-        cls.logger = setup_logging().getChild(cls.__name__)
+        setup_logging()
+        cls.logger = get_logger(cls.__name__)
         cls.generator = AudioGenerator()
         cls.file_manager = AudioFileManager()
         cls.player = AudioPlayer()
         
-        cls.logger.info("=== 音频扬声器验证测试开始 ===")
+        print("=== 音频扬声器验证测试开始 ===")
         
         # 检查音频设备
         devices = cls.player.get_available_output_devices()
-        cls.logger.info(f"检测到 {len(devices)} 个输出设备")
+        print(f"检测到 {len(devices)} 个输出设备")
         for device in devices:
-            cls.logger.info(f"  设备 {device['id']}: {device['name']} ({device['channels']}声道)")
+            print(f"  设备 {device['id']}: {device['name']} ({device['channels']}声道)")
     
     @classmethod
     def tearDownClass(cls):
         """测试类清理"""
-        cls.logger.info("=== 音频扬声器验证测试结束 ===")
+        print("=== 音频扬声器验证测试结束 ===")
         
         # 可选：清理测试文件（保留用于手动验证）
         # cls.file_manager.cleanup_test_files()
     
     def test_audio_device_detection(self):
         """测试音频设备检测"""
-        self.logger.info("测试音频设备检测")
+        print("测试音频设备检测")
         
         devices = self.player.get_available_output_devices()
         self.assertGreater(len(devices), 0, "未检测到可用的音频输出设备")
@@ -397,7 +401,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     
     def test_sine_wave_generation(self):
         """测试正弦波生成"""
-        self.logger.info("测试正弦波生成")
+        print("测试正弦波生成")
         
         for freq in TestConfig.TEST_FREQUENCIES:
             with self.subTest(frequency=freq):
@@ -417,7 +421,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     
     def test_white_noise_generation(self):
         """测试白噪声生成"""
-        self.logger.info("测试白噪声生成")
+        print("测试白噪声生成")
         
         audio_data = self.generator.generate_white_noise(1.0)
         
@@ -432,7 +436,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     
     def test_frequency_sweep_generation(self):
         """测试扫频信号生成"""
-        self.logger.info("测试扫频信号生成")
+        print("测试扫频信号生成")
         
         audio_data = self.generator.generate_frequency_sweep(
             TestConfig.SWEEP_START_FREQ, 
@@ -451,7 +455,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     
     def test_multi_tone_generation(self):
         """测试多音调信号生成"""
-        self.logger.info("测试多音调信号生成")
+        print("测试多音调信号生成")
         
         audio_data = self.generator.generate_multi_tone(
             TestConfig.TEST_FREQUENCIES[:2], 
@@ -469,7 +473,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     
     def test_audio_file_operations(self):
         """测试音频文件操作"""
-        self.logger.info("测试音频文件操作")
+        print("测试音频文件操作")
         
         # 生成测试音频
         original_data = self.generator.generate_sine_wave(1000, 0.5)
@@ -491,7 +495,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     
     def test_audio_playback_basic(self):
         """测试基础音频播放功能"""
-        self.logger.info("测试基础音频播放功能")
+        print("测试基础音频播放功能")
         
         # 生成短音频
         audio_data = self.generator.generate_sine_wave(1000, 0.2)  # 200ms
@@ -509,7 +513,7 @@ class TestAudioSpeakerVerification(unittest.TestCase):
     @unittest.skipIf(os.getenv('CI') or not sys.stdin.isatty(), "跳过交互式测试")
     def test_interactive_speaker_verification(self):
         """交互式扬声器验证测试"""
-        self.logger.info("开始交互式扬声器验证测试")
+        print("开始交互式扬声器验证测试")
         
         test_cases = [
             ("440Hz正弦波", lambda: self.generator.generate_sine_wave(440, 2.0)),
@@ -543,8 +547,9 @@ class TestAudioSpeakerVerification(unittest.TestCase):
 
 def generate_test_audio_files():
     """生成所有测试音频文件"""
-    logger = setup_logging().getChild("AudioFileGenerator")
-    logger.info("开始生成测试音频文件")
+    setup_logging()
+    logger = get_logger("AudioFileGenerator")
+    print("开始生成测试音频文件")
     
     generator = AudioGenerator()
     file_manager = AudioFileManager()
@@ -565,38 +570,39 @@ def generate_test_audio_files():
     
     for filename, audio_generator in test_audio_configs:
         try:
-            logger.info(f"生成音频文件: {filename}")
+            print(f"生成音频文件: {filename}")
             audio_data = audio_generator()
             file_path = file_manager.save_audio_to_wav(audio_data, filename)
             generated_files.append(file_path)
-            logger.info(f"✅ 生成成功: {file_path}")
+            print(f"✅ 生成成功: {file_path}")
             
         except Exception as e:
-            logger.error(f"❌ 生成失败 {filename}: {e}")
+            print(f"❌ 生成失败 {filename}: {e}")
     
-    logger.info(f"音频文件生成完成，共生成 {len(generated_files)} 个文件")
-    logger.info(f"文件保存位置: {TestConfig.TEST_AUDIO_DIR}")
+    print(f"音频文件生成完成，共生成 {len(generated_files)} 个文件")
+    print(f"文件保存位置: {TestConfig.TEST_AUDIO_DIR}")
     
     return generated_files
 
 
 def play_test_audio_files(device_id: Optional[int] = None):
     """播放所有测试音频文件"""
-    logger = setup_logging().getChild("AudioFilePlayer")
-    logger.info("开始播放测试音频文件")
+    setup_logging()
+    logger = get_logger("AudioFilePlayer")
+    print("开始播放测试音频文件")
     
     player = AudioPlayer(device_id)
     
     # 检查设备
     devices = player.get_available_output_devices()
     if not devices:
-        logger.error("未找到可用的音频输出设备")
+        print("未找到可用的音频输出设备")
         return False
     
     if device_id is not None:
-        logger.info(f"使用指定设备 ID: {device_id}")
+        print(f"使用指定设备 ID: {device_id}")
     else:
-        logger.info("使用默认音频设备")
+        print("使用默认音频设备")
     
     # 查找测试音频文件
     audio_files = list(TestConfig.TEST_AUDIO_DIR.glob("*.wav"))
@@ -606,33 +612,33 @@ def play_test_audio_files(device_id: Optional[int] = None):
         audio_files = list(TestConfig.TEST_AUDIO_DIR.glob("*.wav"))
     
     if not audio_files:
-        logger.error("无法生成或找到测试音频文件")
+        print("无法生成或找到测试音频文件")
         return False
     
-    logger.info(f"找到 {len(audio_files)} 个测试音频文件")
+    print(f"找到 {len(audio_files)} 个测试音频文件")
     
     # 播放每个文件
     for i, file_path in enumerate(sorted(audio_files), 1):
-        logger.info(f"[{i}/{len(audio_files)}] 播放: {file_path.name}")
+        print(f"[{i}/{len(audio_files)}] 播放: {file_path.name}")
         
         try:
             success = player.play_audio_file(file_path, blocking=True)
             if success:
-                logger.info(f"✅ 播放完成: {file_path.name}")
+                print(f"✅ 播放完成: {file_path.name}")
             else:
-                logger.error(f"❌ 播放失败: {file_path.name}")
+                print(f"❌ 播放失败: {file_path.name}")
                 
             # 文件间间隔
             time.sleep(0.5)
             
         except KeyboardInterrupt:
-            logger.info("播放被用户中断")
+            print("播放被用户中断")
             player.stop_playback()
             break
         except Exception as e:
-            logger.error(f"播放文件时出错 {file_path.name}: {e}")
+            print(f"播放文件时出错 {file_path.name}: {e}")
     
-    logger.info("测试音频播放完成")
+    print("测试音频播放完成")
     return True
 
 
@@ -648,7 +654,6 @@ def main():
     args = parser.parse_args()
     
     # 初始化日志
-    logger = setup_logging().getChild("AudioSpeakerTest")
     
     try:
         if args.list_devices:
@@ -686,25 +691,25 @@ def main():
         print("正在运行完整测试套件...")
         
         # 生成测试音频
-        logger.info("生成测试音频文件")
+        print("生成测试音频文件")
         generate_test_audio_files()
         
         # 运行单元测试
-        logger.info("运行单元测试")
+        print("运行单元测试")
         unittest.main(argv=[''], exit=False, verbosity=2)
         
         # 播放测试音频
-        logger.info("播放测试音频")
+        print("播放测试音频")
         play_test_audio_files(args.device_id)
         
         print("\n✅ 音频扬声器验证测试完成")
         print(f"测试音频文件保存在: {TestConfig.TEST_AUDIO_DIR}")
         
     except KeyboardInterrupt:
-        logger.info("测试被用户中断")
+        print("测试被用户中断")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"测试过程中发生错误: {e}", exc_info=True)
+        print(f"测试过程中发生错误: {e}", exc_info=True)
         sys.exit(1)
 
 
