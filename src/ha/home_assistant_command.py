@@ -147,6 +147,15 @@ class HomeAssistantControlDemo:
         # 关闭电视
         return self.call_service("button", "press", entity_id)
 
+
+    def air_cleaner_on(self, entity_id):
+        """开启空气净化器"""
+        return self.call_service("fan", "turn_on", entity_id)
+
+    def air_cleaner_off(self, entity_id):
+        """开启空气净化器"""
+        return self.call_service("fan", "turn_off", entity_id)
+
     def demo_control_devices(self, demo_devices, interval=10):
         """
         演示控制设备
@@ -229,7 +238,8 @@ def main():
     LONG_LIVED_TOKEN = ha_service_data["token"]
     # 请在这里填写你的设备 entity_id
     demo_devices = {
-        "灯": "light.ftd_cn_1123337548_ftdlmp_s_2_light",
+       "air_clean": "fan.fan.zhimi_cn_287827089_ma2_s_2_air_purifier",
+        # "灯": "light.ftd_cn_1123337548_ftdlmp_s_2_light",
         # "tv_on": "button.xiaomi_cn_885441719_rmi1_turn_on_a_6_1",
         # "tv_off":"button.xiaomi_cn_885441719_rmi1_turn_off_a_7_1"
         # "空调": "climate.scdvb_cn_1102732000_acm",
