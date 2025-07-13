@@ -83,6 +83,10 @@ class AudioCodec:
             input_candidates = []
             output_candidates = []
             
+            # 优先选择支持16kHz采样率的设备，如果没有则选择sysdefault
+            preferred_output_device = None
+            sysdefault_device = None
+            
             for i, device in enumerate(devices):
                 if device['max_input_channels'] > 0:
                     input_candidates.append((i, device['name'], device['max_input_channels']))
@@ -91,9 +95,18 @@ class AudioCodec:
                         logger.info(f"选择输入设备 {i}: {device['name']} (通道数: {device['max_input_channels']})")
                 if device['max_output_channels'] > 0:
                     output_candidates.append((i, device['name'], device['max_output_channels']))
+                    # 检查是否是sysdefault设备（通常支持更多采样率）
+                    if 'sysdefault' in device['name'].lower():
+                        sysdefault_device = i
+                        logger.debug(f"发现sysdefault设备: {i}")
                     if output_device is None:
                         output_device = i
                         logger.info(f"选择输出设备 {i}: {device['name']} (通道数: {device['max_output_channels']})")
+            
+            # 如果找到了sysdefault设备，优先使用它作为输出设备
+            if sysdefault_device is not None:
+                output_device = sysdefault_device
+                logger.info(f"🔄 切换到sysdefault输出设备 {output_device}: {devices[output_device]['name']} (支持更多采样率)")
             
             # 输出候选设备信息
             logger.debug(f"可用输入设备候选: {input_candidates}")
@@ -124,6 +137,23 @@ class AudioCodec:
             self.device_output_sample_rate = int(
                 output_device_info["default_samplerate"]
             )
+            
+            # 验证输出设备是否支持项目所需的采样率
+            logger.debug("验证输出设备采样率兼容性...")
+            supported_output_rates = self._test_device_sample_rates(output_device, is_output=True)
+            logger.debug(f"输出设备支持的采样率: {supported_output_rates}")
+            
+            # 如果设备不支持16kHz，但支持其他采样率，选择最接近的
+            if AudioConfig.OUTPUT_SAMPLE_RATE not in supported_output_rates:
+                if self.device_output_sample_rate in supported_output_rates:
+                    logger.info(f"⚠️ 输出设备不支持{AudioConfig.OUTPUT_SAMPLE_RATE}Hz，使用设备默认采样率{self.device_output_sample_rate}Hz")
+                else:
+                    # 选择最接近的支持采样率
+                    closest_rate = min(supported_output_rates, key=lambda x: abs(x - AudioConfig.OUTPUT_SAMPLE_RATE))
+                    self.device_output_sample_rate = closest_rate
+                    logger.info(f"⚠️ 输出设备不支持{AudioConfig.OUTPUT_SAMPLE_RATE}Hz，使用最接近的支持采样率{closest_rate}Hz")
+            else:
+                logger.info(f"✅ 输出设备支持目标采样率{AudioConfig.OUTPUT_SAMPLE_RATE}Hz")
 
             # 缓存帧大小计算结果
             frame_duration_sec = AudioConfig.FRAME_DURATION / 1000
@@ -180,6 +210,54 @@ class AudioCodec:
             logger.error(f"错误堆栈: {traceback.format_exc()}")
             await self.close()
             raise
+
+    def _test_device_sample_rates(self, device_id, is_output=True):
+        """
+        测试设备支持的采样率。
+        
+        Args:
+            device_id: 设备ID
+            is_output: 是否为输出设备
+            
+        Returns:
+            list: 支持的采样率列表
+        """
+        test_rates = [8000, 16000, 22050, 24000, 44100, 48000]
+        supported_rates = []
+        
+        for rate in test_rates:
+            try:
+                if is_output:
+                    # 测试输出流
+                    test_stream = sd.OutputStream(
+                        device=device_id,
+                        samplerate=rate,
+                        channels=AudioConfig.CHANNELS,
+                        dtype='int16',
+                        blocksize=1024,
+                        latency='low'
+                    )
+                else:
+                    # 测试输入流
+                    test_stream = sd.InputStream(
+                        device=device_id,
+                        samplerate=rate,
+                        channels=AudioConfig.CHANNELS,
+                        dtype='int16',
+                        blocksize=1024,
+                        latency='low'
+                    )
+                
+                # 如果能成功创建流，说明支持该采样率
+                test_stream.close()
+                supported_rates.append(rate)
+                logger.debug(f"✅ 设备{device_id}支持采样率{rate}Hz")
+                
+            except Exception as e:
+                logger.debug(f"❌ 设备{device_id}不支持采样率{rate}Hz: {e}")
+                continue
+                
+        return supported_rates
 
     async def _create_resamplers(self):
         """
