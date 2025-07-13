@@ -1,0 +1,163 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; fill: #2c3e50; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #34495e; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; fill: #2c3e50; }
+      .success { fill: #27ae60; stroke: #27ae60; }
+      .error { fill: #e74c3c; stroke: #e74c3c; }
+      .process { fill: #3498db; stroke: #2980b9; }
+      .decision { fill: #f39c12; stroke: #e67e22; }
+      .analysis { fill: #9b59b6; stroke: #8e44ad; }
+      .rect { stroke-width: 2; rx: 5; }
+      .diamond { stroke-width: 2; }
+      .arrow { stroke: #34495e; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34495e" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" class="title">音频设备初始化问题分析流程图</text>
+  
+  <!-- Start -->
+  <rect x="520" y="50" width="160" height="40" class="rect process">
+    <text x="600" y="75" text-anchor="middle" class="text">开始分析</text>
+  </rect>
+  
+  <!-- Log Analysis -->
+  <rect x="50" y="120" width="200" height="60" class="rect analysis">
+    <text x="150" y="140" text-anchor="middle" class="subtitle">日志分析</text>
+    <text x="150" y="155" text-anchor="middle" class="text">scan日志: 4个设备，成功</text>
+    <text x="150" y="170" text-anchor="middle" class="text">run日志: 3个设备，失败</text>
+  </rect>
+  
+  <!-- Code Analysis -->
+  <rect x="300" y="120" width="200" height="60" class="rect analysis">
+    <text x="400" y="140" text-anchor="middle" class="subtitle">代码分析</text>
+    <text x="400" y="155" text-anchor="middle" class="text">audio_codec.py:107</text>
+    <text x="400" y="170" text-anchor="middle" class="text">RuntimeError异常</text>
+  </rect>
+  
+  <!-- Environment Analysis -->
+  <rect x="550" y="120" width="200" height="60" class="rect analysis">
+    <text x="650" y="140" text-anchor="middle" class="subtitle">环境分析</text>
+    <text x="650" y="155" text-anchor="middle" class="text">macOS系统</text>
+    <text x="650" y="170" text-anchor="middle" class="text">PortAudio/SoundDevice</text>
+  </rect>
+  
+  <!-- Root Cause Analysis -->
+  <rect x="400" y="220" width="400" height="80" class="rect decision">
+    <text x="600" y="240" text-anchor="middle" class="subtitle">根本原因分析</text>
+    <text x="600" y="255" text-anchor="middle" class="text">设备数量不一致的可能原因：</text>
+    <text x="600" y="270" text-anchor="middle" class="text">1. PortAudio设备缓存问题</text>
+    <text x="600" y="285" text-anchor="middle" class="text">2. 系统资源竞争</text>
+    <text x="600" y="300" text-anchor="middle" class="text">3. 设备状态变化</text>
+  </rect>
+  
+  <!-- Specific Issues -->
+  <rect x="50" y="340" width="180" height="80" class="rect error">
+    <text x="140" y="360" text-anchor="middle" class="subtitle">问题1: 设备缓存</text>
+    <text x="140" y="375" text-anchor="middle" class="text">PortAudio可能缓存</text>
+    <text x="140" y="390" text-anchor="middle" class="text">了过时的设备信息</text>
+    <text x="140" y="405" text-anchor="middle" class="text">导致设备数量不准确</text>
+  </rect>
+  
+  <rect x="270" y="340" width="180" height="80" class="rect error">
+    <text x="360" y="360" text-anchor="middle" class="subtitle">问题2: 资源竞争</text>
+    <text x="360" y="375" text-anchor="middle" class="text">多个进程同时访问</text>
+    <text x="360" y="390" text-anchor="middle" class="text">音频设备可能导致</text>
+    <text x="360" y="405" text-anchor="middle" class="text">设备暂时不可用</text>
+  </rect>
+  
+  <rect x="490" y="340" width="180" height="80" class="rect error">
+    <text x="580" y="360" text-anchor="middle" class="subtitle">问题3: 状态变化</text>
+    <text x="580" y="375" text-anchor="middle" class="text">设备在两次查询间</text>
+    <text x="580" y="390" text-anchor="middle" class="text">状态发生变化</text>
+    <text x="580" y="405" text-anchor="middle" class="text">(插拔、系统更新等)</text>
+  </rect>
+  
+  <rect x="710" y="340" width="180" height="80" class="rect error">
+    <text x="800" y="360" text-anchor="middle" class="subtitle">问题4: 日志级别</text>
+    <text x="800" y="375" text-anchor="middle" class="text">logging_config.py</text>
+    <text x="800" y="390" text-anchor="middle" class="text">设置为INFO级别</text>
+    <text x="800" y="405" text-anchor="middle" class="text">隐藏了DEBUG信息</text>
+  </rect>
+  
+  <!-- Error Location -->
+  <rect x="400" y="460" width="400" height="60" class="rect error">
+    <text x="600" y="480" text-anchor="middle" class="subtitle">错误位置确认</text>
+    <text x="600" y="495" text-anchor="middle" class="text">文件: src/audio_codecs/audio_codec.py</text>
+    <text x="600" y="510" text-anchor="middle" class="text">行号: 107 - RuntimeError: 找不到可用的音频输出设备</text>
+  </rect>
+  
+  <!-- Solutions -->
+  <rect x="100" y="560" width="200" height="80" class="rect success">
+    <text x="200" y="580" text-anchor="middle" class="subtitle">解决方案1</text>
+    <text x="200" y="595" text-anchor="middle" class="text">启用DEBUG日志</text>
+    <text x="200" y="610" text-anchor="middle" class="text">获取详细设备信息</text>
+    <text x="200" y="625" text-anchor="middle" class="text">已实施 ✓</text>
+  </rect>
+  
+  <rect x="350" y="560" width="200" height="80" class="rect success">
+    <text x="450" y="580" text-anchor="middle" class="subtitle">解决方案2</text>
+    <text x="450" y="595" text-anchor="middle" class="text">增强错误处理</text>
+    <text x="450" y="610" text-anchor="middle" class="text">添加重试机制</text>
+    <text x="450" y="625" text-anchor="middle" class="text">建议实施</text>
+  </rect>
+  
+  <rect x="600" y="560" width="200" height="80" class="rect success">
+    <text x="700" y="580" text-anchor="middle" class="subtitle">解决方案3</text>
+    <text x="700" y="595" text-anchor="middle" class="text">设备状态检查</text>
+    <text x="700" y="610" text-anchor="middle" class="text">验证设备可用性</text>
+    <text x="700" y="625" text-anchor="middle" class="text">建议实施</text>
+  </rect>
+  
+  <rect x="850" y="560" width="200" height="80" class="rect process">
+    <text x="950" y="580" text-anchor="middle" class="subtitle">下一步</text>
+    <text x="950" y="595" text-anchor="middle" class="text">运行增强日志版本</text>
+    <text x="950" y="610" text-anchor="middle" class="text">分析详细输出</text>
+    <text x="950" y="625" text-anchor="middle" class="text">确定具体原因</text>
+  </rect>
+  
+  <!-- Arrows -->
+  <line x1="600" y1="90" x2="600" y2="120" class="arrow" />
+  <line x1="600" y1="90" x2="150" y2="120" class="arrow" />
+  <line x1="600" y1="90" x2="400" y2="120" class="arrow" />
+  <line x1="600" y1="90" x2="650" y2="120" class="arrow" />
+  
+  <line x1="150" y1="180" x2="500" y2="220" class="arrow" />
+  <line x1="400" y1="180" x2="550" y2="220" class="arrow" />
+  <line x1="650" y1="180" x2="650" y2="220" class="arrow" />
+  
+  <line x1="500" y1="300" x2="140" y2="340" class="arrow" />
+  <line x1="550" y1="300" x2="360" y2="340" class="arrow" />
+  <line x1="650" y1="300" x2="580" y2="340" class="arrow" />
+  <line x1="700" y1="300" x2="800" y2="340" class="arrow" />
+  
+  <line x1="600" y1="300" x2="600" y2="460" class="arrow" />
+  
+  <line x1="500" y1="520" x2="200" y2="560" class="arrow" />
+  <line x1="550" y1="520" x2="450" y2="560" class="arrow" />
+  <line x1="650" y1="520" x2="700" y2="560" class="arrow" />
+  <line x1="700" y1="520" x2="950" y2="560" class="arrow" />
+  
+  <!-- Legend -->
+  <rect x="50" y="700" width="1100" height="80" class="rect" fill="#ecf0f1" stroke="#bdc3c7">
+    <text x="600" y="720" text-anchor="middle" class="subtitle">图例说明</text>
+    <rect x="80" y="730" width="15" height="15" class="process" />
+    <text x="105" y="742" class="text">处理步骤</text>
+    <rect x="200" y="730" width="15" height="15" class="analysis" />
+    <text x="225" y="742" class="text">分析过程</text>
+    <rect x="320" y="730" width="15" height="15" class="decision" />
+    <text x="345" y="742" class="text">决策点</text>
+    <rect x="440" y="730" width="15" height="15" class="error" />
+    <text x="465" y="742" class="text">问题/错误</text>
+    <rect x="560" y="730" width="15" height="15" class="success" />
+    <text x="585" y="742" class="text">解决方案</text>
+    
+    <text x="80" y="765" class="text">关键发现: test_audio_fix.py成功(4设备) vs main.py失败(3设备)</text>
+    <text x="600" y="765" class="text">根本原因: PortAudio设备检测不一致 + 日志级别过高隐藏调试信息</text>
+  </rect>
+</svg>

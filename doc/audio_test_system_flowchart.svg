@@ -1,0 +1,271 @@
+<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; fill: #2c3e50; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #34495e; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; fill: #2c3e50; }
+      .small-text { font-family: Arial, sans-serif; font-size: 10px; fill: #7f8c8d; }
+      .start-end { fill: #e74c3c; stroke: #c0392b; stroke-width: 2; }
+      .process { fill: #3498db; stroke: #2980b9; stroke-width: 2; }
+      .decision { fill: #f39c12; stroke: #e67e22; stroke-width: 2; }
+      .data { fill: #2ecc71; stroke: #27ae60; stroke-width: 2; }
+      .error { fill: #e74c3c; stroke: #c0392b; stroke-width: 2; }
+      .arrow { stroke: #34495e; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .success-arrow { stroke: #27ae60; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .error-arrow { stroke: #e74c3c; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34495e" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" class="title">音频扬声器测试系统流程图</text>
+  <text x="600" y="50" text-anchor="middle" class="subtitle">Audio Speaker Test System Flowchart</text>
+  
+  <!-- Start -->
+  <ellipse cx="600" cy="100" rx="80" ry="30" class="start-end"/>
+  <text x="600" y="105" text-anchor="middle" class="text" fill="white">开始测试</text>
+  
+  <!-- Initialize Logging -->
+  <rect x="520" y="150" width="160" height="40" rx="5" class="process"/>
+  <text x="600" y="175" text-anchor="middle" class="text" fill="white">初始化日志系统</text>
+  <text x="600" y="190" text-anchor="middle" class="small-text" fill="white">setup_logging()</text>
+  
+  <!-- Parse Arguments -->
+  <rect x="520" y="220" width="160" height="40" rx="5" class="process"/>
+  <text x="600" y="245" text-anchor="middle" class="text" fill="white">解析命令行参数</text>
+  <text x="600" y="260" text-anchor="middle" class="small-text" fill="white">argparse</text>
+  
+  <!-- Decision: Test Mode -->
+  <polygon points="600,290 680,320 600,350 520,320" class="decision"/>
+  <text x="600" y="320" text-anchor="middle" class="text" fill="white">测试模式?</text>
+  
+  <!-- List Devices Branch -->
+  <rect x="100" y="380" width="140" height="40" rx="5" class="process"/>
+  <text x="170" y="400" text-anchor="middle" class="text" fill="white">列出音频设备</text>
+  <text x="170" y="415" text-anchor="middle" class="small-text" fill="white">AudioPlayer.get_devices()</text>
+  
+  <!-- Generate Only Branch -->
+  <rect x="280" y="380" width="140" height="40" rx="5" class="process"/>
+  <text x="350" y="400" text-anchor="middle" class="text" fill="white">生成测试音频</text>
+  <text x="350" y="415" text-anchor="middle" class="small-text" fill="white">generate_test_audio_files()</text>
+  
+  <!-- Play Only Branch -->
+  <rect x="460" y="380" width="140" height="40" rx="5" class="process"/>
+  <text x="530" y="400" text-anchor="middle" class="text" fill="white">播放测试音频</text>
+  <text x="530" y="415" text-anchor="middle" class="small-text" fill="white">play_test_audio_files()</text>
+  
+  <!-- Cleanup Branch -->
+  <rect x="640" y="380" width="140" height="40" rx="5" class="process"/>
+  <text x="710" y="400" text-anchor="middle" class="text" fill="white">清理测试文件</text>
+  <text x="710" y="415" text-anchor="middle" class="small-text" fill="white">FileManager.cleanup()</text>
+  
+  <!-- Full Test Branch -->
+  <rect x="820" y="380" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="400" text-anchor="middle" class="text" fill="white">完整测试流程</text>
+  <text x="890" y="415" text-anchor="middle" class="small-text" fill="white">Full Test Suite</text>
+  
+  <!-- Audio Generation Process -->
+  <rect x="820" y="450" width="140" height="40" rx="5" class="data"/>
+  <text x="890" y="470" text-anchor="middle" class="text" fill="white">音频信号生成</text>
+  <text x="890" y="485" text-anchor="middle" class="small-text" fill="white">AudioGenerator</text>
+  
+  <!-- Signal Types -->
+  <rect x="720" y="520" width="100" height="30" rx="3" class="data"/>
+  <text x="770" y="540" text-anchor="middle" class="small-text" fill="white">正弦波信号</text>
+  
+  <rect x="840" y="520" width="100" height="30" rx="3" class="data"/>
+  <text x="890" y="540" text-anchor="middle" class="small-text" fill="white">白噪声信号</text>
+  
+  <rect x="960" y="520" width="100" height="30" rx="3" class="data"/>
+  <text x="1010" y="540" text-anchor="middle" class="small-text" fill="white">扫频信号</text>
+  
+  <!-- File Save -->
+  <rect x="820" y="580" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="600" text-anchor="middle" class="text" fill="white">保存音频文件</text>
+  <text x="890" y="615" text-anchor="middle" class="small-text" fill="white">FileManager.save_wav()</text>
+  
+  <!-- Device Detection -->
+  <rect x="820" y="650" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="670" text-anchor="middle" class="text" fill="white">检测音频设备</text>
+  <text x="890" y="685" text-anchor="middle" class="small-text" fill="white">sounddevice.query_devices()</text>
+  
+  <!-- Device Check Decision -->
+  <polygon points="890,720 950,740 890,760 830,740" class="decision"/>
+  <text x="890" y="740" text-anchor="middle" class="small-text" fill="white">设备可用?</text>
+  
+  <!-- No Device Error -->
+  <rect x="1020" y="720" width="120" height="40" rx="5" class="error"/>
+  <text x="1080" y="740" text-anchor="middle" class="text" fill="white">设备错误</text>
+  <text x="1080" y="755" text-anchor="middle" class="small-text" fill="white">No Audio Device</text>
+  
+  <!-- Unit Tests -->
+  <rect x="820" y="800" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="820" text-anchor="middle" class="text" fill="white">运行单元测试</text>
+  <text x="890" y="835" text-anchor="middle" class="small-text" fill="white">unittest.main()</text>
+  
+  <!-- Test Cases -->
+  <rect x="680" y="870" width="120" height="30" rx="3" class="data"/>
+  <text x="740" y="890" text-anchor="middle" class="small-text" fill="white">设备检测测试</text>
+  
+  <rect x="820" y="870" width="120" height="30" rx="3" class="data"/>
+  <text x="880" y="890" text-anchor="middle" class="small-text" fill="white">音频生成测试</text>
+  
+  <rect x="960" y="870" width="120" height="30" rx="3" class="data"/>
+  <text x="1020" y="890" text-anchor="middle" class="small-text" fill="white">文件操作测试</text>
+  
+  <!-- Audio Playback -->
+  <rect x="820" y="930" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="950" text-anchor="middle" class="text" fill="white">音频播放测试</text>
+  <text x="890" y="965" text-anchor="middle" class="small-text" fill="white">AudioPlayer.play()</text>
+  
+  <!-- Playback Decision -->
+  <polygon points="890,1000 950,1020 890,1040 830,1020" class="decision"/>
+  <text x="890" y="1020" text-anchor="middle" class="small-text" fill="white">播放成功?</text>
+  
+  <!-- Interactive Test -->
+  <rect x="680" y="1080" width="140" height="40" rx="5" class="process"/>
+  <text x="750" y="1100" text-anchor="middle" class="text" fill="white">交互式验证</text>
+  <text x="750" y="1115" text-anchor="middle" class="small-text" fill="white">User Confirmation</text>
+  
+  <!-- Playback Error -->
+  <rect x="1020" y="1000" width="120" height="40" rx="5" class="error"/>
+  <text x="1080" y="1020" text-anchor="middle" class="text" fill="white">播放错误</text>
+  <text x="1080" y="1035" text-anchor="middle" class="small-text" fill="white">Playback Failed</text>
+  
+  <!-- Test Results -->
+  <rect x="820" y="1150" width="140" height="40" rx="5" class="data"/>
+  <text x="890" y="1170" text-anchor="middle" class="text" fill="white">生成测试报告</text>
+  <text x="890" y="1185" text-anchor="middle" class="small-text" fill="white">Test Report</text>
+  
+  <!-- Log Results -->
+  <rect x="820" y="1220" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="1240" text-anchor="middle" class="text" fill="white">记录测试日志</text>
+  <text x="890" y="1255" text-anchor="middle" class="small-text" fill="white">Logger.info()</text>
+  
+  <!-- Cleanup -->
+  <rect x="820" y="1290" width="140" height="40" rx="5" class="process"/>
+  <text x="890" y="1310" text-anchor="middle" class="text" fill="white">清理资源</text>
+  <text x="890" y="1325" text-anchor="middle" class="small-text" fill="white">Resource Cleanup</text>
+  
+  <!-- End Success -->
+  <ellipse cx="750" cy="1380" rx="80" ry="30" class="start-end"/>
+  <text x="750" y="1385" text-anchor="middle" class="text" fill="white">测试完成</text>
+  
+  <!-- End Error -->
+  <ellipse cx="1080" cy="1380" rx="80" ry="30" class="error"/>
+  <text x="1080" y="1385" text-anchor="middle" class="text" fill="white">测试失败</text>
+  
+  <!-- Simple End Points -->
+  <ellipse cx="170" cy="460" rx="60" ry="25" class="start-end"/>
+  <text x="170" y="465" text-anchor="middle" class="small-text" fill="white">结束</text>
+  
+  <ellipse cx="350" cy="460" rx="60" ry="25" class="start-end"/>
+  <text x="350" y="465" text-anchor="middle" class="small-text" fill="white">结束</text>
+  
+  <ellipse cx="530" cy="460" rx="60" ry="25" class="start-end"/>
+  <text x="530" y="465" text-anchor="middle" class="small-text" fill="white">结束</text>
+  
+  <ellipse cx="710" cy="460" rx="60" ry="25" class="start-end"/>
+  <text x="710" y="465" text-anchor="middle" class="small-text" fill="white">结束</text>
+  
+  <!-- Arrows -->
+  <!-- Main flow -->
+  <line x1="600" y1="130" x2="600" y2="150" class="arrow"/>
+  <line x1="600" y1="190" x2="600" y2="220" class="arrow"/>
+  <line x1="600" y1="260" x2="600" y2="290" class="arrow"/>
+  
+  <!-- Branch arrows -->
+  <line x1="520" y1="320" x2="170" y2="380" class="arrow"/>
+  <line x1="550" y1="320" x2="350" y2="380" class="arrow"/>
+  <line x1="580" y1="320" x2="530" y2="380" class="arrow"/>
+  <line x1="620" y1="320" x2="710" y2="380" class="arrow"/>
+  <line x1="680" y1="320" x2="890" y2="380" class="arrow"/>
+  
+  <!-- Simple end arrows -->
+  <line x1="170" y1="420" x2="170" y2="435" class="arrow"/>
+  <line x1="350" y1="420" x2="350" y2="435" class="arrow"/>
+  <line x1="530" y1="420" x2="530" y2="435" class="arrow"/>
+  <line x1="710" y1="420" x2="710" y2="435" class="arrow"/>
+  
+  <!-- Full test flow -->
+  <line x1="890" y1="420" x2="890" y2="450" class="arrow"/>
+  <line x1="890" y1="490" x2="890" y2="520" class="arrow"/>
+  
+  <!-- Signal generation branches -->
+  <line x1="840" y1="520" x2="770" y2="520" class="arrow"/>
+  <line x1="940" y1="520" x2="1010" y2="520" class="arrow"/>
+  
+  <!-- Continue flow -->
+  <line x1="890" y1="550" x2="890" y2="580" class="arrow"/>
+  <line x1="890" y1="620" x2="890" y2="650" class="arrow"/>
+  <line x1="890" y1="690" x2="890" y2="720" class="arrow"/>
+  
+  <!-- Device check branches -->
+  <line x1="950" y1="740" x2="1020" y2="740" class="error-arrow"/>
+  <line x1="890" y1="760" x2="890" y2="800" class="success-arrow"/>
+  
+  <!-- Test flow -->
+  <line x1="890" y1="840" x2="890" y2="870" class="arrow"/>
+  <line x1="820" y1="870" x2="740" y2="870" class="arrow"/>
+  <line x1="960" y1="870" x2="1020" y2="870" class="arrow"/>
+  
+  <line x1="890" y1="900" x2="890" y2="930" class="arrow"/>
+  <line x1="890" y1="970" x2="890" y2="1000" class="arrow"/>
+  
+  <!-- Playback branches -->
+  <line x1="950" y1="1020" x2="1020" y2="1020" class="error-arrow"/>
+  <line x1="830" y1="1020" x2="750" y2="1080" class="success-arrow"/>
+  
+  <!-- Final flow -->
+  <line x1="750" y1="1120" x2="890" y2="1150" class="arrow"/>
+  <line x1="890" y1="1190" x2="890" y2="1220" class="arrow"/>
+  <line x1="890" y1="1260" x2="890" y2="1290" class="arrow"/>
+  <line x1="890" y1="1330" x2="750" y2="1350" class="success-arrow"/>
+  
+  <!-- Error flows -->
+  <line x1="1080" y1="760" x2="1080" y2="1350" class="error-arrow"/>
+  <line x1="1080" y1="1040" x2="1080" y2="1350" class="error-arrow"/>
+  
+  <!-- Labels for branches -->
+  <text x="400" y="340" class="small-text">--list-devices</text>
+  <text x="480" y="340" class="small-text">--generate-only</text>
+  <text x="580" y="340" class="small-text">--play-only</text>
+  <text x="680" y="340" class="small-text">--cleanup</text>
+  <text x="780" y="340" class="small-text">完整测试</text>
+  
+  <text x="970" y="730" class="small-text">否</text>
+  <text x="890" y="780" class="small-text">是</text>
+  
+  <text x="970" y="1010" class="small-text">否</text>
+  <text x="810" y="1050" class="small-text">是</text>
+  
+  <!-- Legend -->
+  <rect x="50" y="1450" width="300" height="120" fill="none" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="200" y="1470" text-anchor="middle" class="subtitle">图例 Legend</text>
+  
+  <ellipse cx="80" cy="1490" rx="20" ry="10" class="start-end"/>
+  <text x="110" y="1495" class="small-text">开始/结束</text>
+  
+  <rect x="60" y="1505" width="40" height="15" class="process"/>
+  <text x="110" y="1515" class="small-text">处理过程</text>
+  
+  <polygon points="70,1525 90,1535 70,1545 50,1535" class="decision"/>
+  <text x="110" y="1540" class="small-text">判断决策</text>
+  
+  <rect x="60" y="1550" width="40" height="15" class="data"/>
+  <text x="110" y="1560" class="small-text">数据/文件</text>
+  
+  <rect x="200" y="1490" width="40" height="15" class="error"/>
+  <text x="250" y="1500" class="small-text">错误处理</text>
+  
+  <line x1="200" y1="1515" x2="240" y2="1515" class="arrow"/>
+  <text x="250" y="1520" class="small-text">正常流程</text>
+  
+  <line x1="200" y1="1535" x2="240" y2="1535" class="success-arrow"/>
+  <text x="250" y="1540" class="small-text">成功分支</text>
+  
+  <line x1="200" y1="1555" x2="240" y2="1555" class="error-arrow"/>
+  <text x="250" y="1560" class="small-text">错误分支</text>
+</svg>

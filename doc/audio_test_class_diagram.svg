@@ -1,0 +1,295 @@
+<svg width="1600" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; fill: #2c3e50; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #34495e; }
+      .class-name { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #2c3e50; }
+      .method-text { font-family: Arial, sans-serif; font-size: 10px; fill: #2c3e50; }
+      .attribute-text { font-family: Arial, sans-serif; font-size: 10px; fill: #7f8c8d; }
+      .small-text { font-family: Arial, sans-serif; font-size: 9px; fill: #95a5a6; }
+      .class-box { fill: #ecf0f1; stroke: #34495e; stroke-width: 2; }
+      .abstract-class { fill: #d5dbdb; stroke: #34495e; stroke-width: 2; stroke-dasharray: 5,5; }
+      .interface { fill: #f8f9fa; stroke: #6c757d; stroke-width: 2; stroke-dasharray: 3,3; }
+      .config-class { fill: #fff3cd; stroke: #856404; stroke-width: 2; }
+      .test-class { fill: #d1ecf1; stroke: #0c5460; stroke-width: 2; }
+      .inheritance { stroke: #2c3e50; stroke-width: 2; fill: none; marker-end: url(#inheritance-arrow); }
+      .composition { stroke: #e74c3c; stroke-width: 2; fill: none; marker-end: url(#composition-arrow); }
+      .aggregation { stroke: #f39c12; stroke-width: 2; fill: none; marker-end: url(#aggregation-arrow); }
+      .dependency { stroke: #9b59b6; stroke-width: 1; fill: none; marker-end: url(#dependency-arrow); stroke-dasharray: 3,3; }
+      .association { stroke: #27ae60; stroke-width: 2; fill: none; marker-end: url(#association-arrow); }
+    </style>
+    
+    <!-- Arrow markers -->
+    <marker id="inheritance-arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+      <polygon points="0 0, 0 10, 10 5" fill="none" stroke="#2c3e50" stroke-width="2"/>
+    </marker>
+    <marker id="composition-arrow" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 8 4, 0 8, 4 4" fill="#e74c3c"/>
+    </marker>
+    <marker id="aggregation-arrow" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 8 4, 0 8, 4 4" fill="none" stroke="#f39c12" stroke-width="2"/>
+    </marker>
+    <marker id="dependency-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9b59b6"/>
+    </marker>
+    <marker id="association-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#27ae60"/>
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="800" y="30" text-anchor="middle" class="title">音频扬声器测试系统类图</text>
+  <text x="800" y="50" text-anchor="middle" class="subtitle">Audio Speaker Test System Class Diagram</text>
+  
+  <!-- TestConfig Class -->
+  <rect x="50" y="80" width="200" height="180" rx="5" class="config-class"/>
+  <text x="150" y="100" text-anchor="middle" class="class-name">TestConfig</text>
+  <line x1="50" y1="110" x2="250" y2="110" stroke="#856404" stroke-width="1"/>
+  
+  <!-- Attributes -->
+  <text x="60" y="130" class="attribute-text">+ SAMPLE_RATE: int = 44100</text>
+  <text x="60" y="145" class="attribute-text">+ CHANNELS: int = 1</text>
+  <text x="60" y="160" class="attribute-text">+ DURATION: float = 2.0</text>
+  <text x="60" y="175" class="attribute-text">+ AMPLITUDE: float = 0.3</text>
+  <text x="60" y="190" class="attribute-text">+ TEST_FREQUENCIES: List[float]</text>
+  <text x="60" y="205" class="attribute-text">+ SWEEP_START_FREQ: float</text>
+  <text x="60" y="220" class="attribute-text">+ SWEEP_END_FREQ: float</text>
+  <text x="60" y="235" class="attribute-text">+ TEST_AUDIO_DIR: Path</text>
+  <text x="60" y="250" class="attribute-text">+ PLAY_BUFFER_SIZE: int</text>
+  
+  <!-- AudioGenerator Class -->
+  <rect x="300" y="80" width="280" height="220" rx="5" class="class-box"/>
+  <text x="440" y="100" text-anchor="middle" class="class-name">AudioGenerator</text>
+  <line x1="300" y1="110" x2="580" y2="110" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Attributes -->
+  <text x="310" y="130" class="attribute-text">- sample_rate: int</text>
+  <text x="310" y="145" class="attribute-text">- logger: Logger</text>
+  <line x1="300" y1="155" x2="580" y2="155" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Methods -->
+  <text x="310" y="175" class="method-text">+ __init__(sample_rate: int)</text>
+  <text x="310" y="190" class="method-text">+ generate_sine_wave(frequency: float,</text>
+  <text x="320" y="205" class="method-text">duration: float, amplitude: float) -> ndarray</text>
+  <text x="310" y="220" class="method-text">+ generate_white_noise(duration: float,</text>
+  <text x="320" y="235" class="method-text">amplitude: float) -> ndarray</text>
+  <text x="310" y="250" class="method-text">+ generate_frequency_sweep(start_freq: float,</text>
+  <text x="320" y="265" class="method-text">end_freq: float, duration: float) -> ndarray</text>
+  <text x="310" y="280" class="method-text">+ generate_multi_tone(frequencies: List[float],</text>
+  <text x="320" y="295" class="method-text">duration: float) -> ndarray</text>
+  
+  <!-- AudioFileManager Class -->
+  <rect x="620" y="80" width="280" height="180" rx="5" class="class-box"/>
+  <text x="760" y="100" text-anchor="middle" class="class-name">AudioFileManager</text>
+  <line x1="620" y1="110" x2="900" y2="110" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Attributes -->
+  <text x="630" y="130" class="attribute-text">- base_dir: Path</text>
+  <text x="630" y="145" class="attribute-text">- logger: Logger</text>
+  <line x1="620" y1="155" x2="900" y2="155" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Methods -->
+  <text x="630" y="175" class="method-text">+ __init__(base_dir: Path)</text>
+  <text x="630" y="190" class="method-text">+ save_audio_to_wav(audio_data: ndarray,</text>
+  <text x="640" y="205" class="method-text">filename: str, sample_rate: int) -> Path</text>
+  <text x="630" y="220" class="method-text">+ load_audio_from_wav(file_path: Path)</text>
+  <text x="640" y="235" class="method-text">-> Tuple[ndarray, int]</text>
+  <text x="630" y="250" class="method-text">+ cleanup_test_files() -> None</text>
+  
+  <!-- AudioPlayer Class -->
+  <rect x="940" y="80" width="280" height="200" rx="5" class="class-box"/>
+  <text x="1080" y="100" text-anchor="middle" class="class-name">AudioPlayer</text>
+  <line x1="940" y1="110" x2="1220" y2="110" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Attributes -->
+  <text x="950" y="130" class="attribute-text">- device_id: Optional[int]</text>
+  <text x="950" y="145" class="attribute-text">- logger: Logger</text>
+  <line x1="940" y1="155" x2="1220" y2="155" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- Methods -->
+  <text x="950" y="175" class="method-text">+ __init__(device_id: Optional[int])</text>
+  <text x="950" y="190" class="method-text">+ get_available_output_devices()</text>
+  <text x="960" y="205" class="method-text">-> List[Dict[str, Any]]</text>
+  <text x="950" y="220" class="method-text">+ play_audio_data(audio_data: ndarray,</text>
+  <text x="960" y="235" class="method-text">sample_rate: int, blocking: bool) -> bool</text>
+  <text x="950" y="250" class="method-text">+ play_audio_file(file_path: Path,</text>
+  <text x="960" y="265" class="method-text">blocking: bool) -> bool</text>
+  <text x="950" y="280" class="method-text">+ stop_playback() -> None</text>
+  
+  <!-- TestAudioSpeakerVerification Class -->
+  <rect x="300" y="350" width="320" height="280" rx="5" class="test-class"/>
+  <text x="460" y="370" text-anchor="middle" class="class-name">TestAudioSpeakerVerification</text>
+  <text x="460" y="385" text-anchor="middle" class="small-text">(unittest.TestCase)</text>
+  <line x1="300" y1="395" x2="620" y2="395" stroke="#0c5460" stroke-width="1"/>
+  
+  <!-- Class Attributes -->
+  <text x="310" y="415" class="attribute-text">+ logger: Logger</text>
+  <text x="310" y="430" class="attribute-text">+ generator: AudioGenerator</text>
+  <text x="310" y="445" class="attribute-text">+ file_manager: AudioFileManager</text>
+  <text x="310" y="460" class="attribute-text">+ player: AudioPlayer</text>
+  <line x1="300" y1="470" x2="620" y2="470" stroke="#0c5460" stroke-width="1"/>
+  
+  <!-- Methods -->
+  <text x="310" y="490" class="method-text">+ setUpClass() -> None</text>
+  <text x="310" y="505" class="method-text">+ tearDownClass() -> None</text>
+  <text x="310" y="520" class="method-text">+ test_audio_device_detection() -> None</text>
+  <text x="310" y="535" class="method-text">+ test_sine_wave_generation() -> None</text>
+  <text x="310" y="550" class="method-text">+ test_white_noise_generation() -> None</text>
+  <text x="310" y="565" class="method-text">+ test_frequency_sweep_generation() -> None</text>
+  <text x="310" y="580" class="method-text">+ test_multi_tone_generation() -> None</text>
+  <text x="310" y="595" class="method-text">+ test_audio_file_operations() -> None</text>
+  <text x="310" y="610" class="method-text">+ test_audio_playback_basic() -> None</text>
+  <text x="310" y="625" class="method-text">+ test_interactive_speaker_verification() -> None</text>
+  
+  <!-- External Dependencies -->
+  <rect x="50" y="350" width="180" height="120" rx="5" class="interface"/>
+  <text x="140" y="370" text-anchor="middle" class="class-name">numpy</text>
+  <line x1="50" y1="380" x2="230" y2="380" stroke="#6c757d" stroke-width="1"/>
+  <text x="60" y="400" class="method-text">+ ndarray</text>
+  <text x="60" y="415" class="method-text">+ linspace()</text>
+  <text x="60" y="430" class="method-text">+ sin()</text>
+  <text x="60" y="445" class="method-text">+ random.normal()</text>
+  <text x="60" y="460" class="method-text">+ cumsum()</text>
+  
+  <rect x="50" y="500" width="180" height="100" rx="5" class="interface"/>
+  <text x="140" y="520" text-anchor="middle" class="class-name">sounddevice</text>
+  <line x1="50" y1="530" x2="230" y2="530" stroke="#6c757d" stroke-width="1"/>
+  <text x="60" y="550" class="method-text">+ query_devices()</text>
+  <text x="60" y="565" class="method-text">+ play()</text>
+  <text x="60" y="580" class="method-text">+ stop()</text>
+  
+  <rect x="50" y="630" width="180" height="80" rx="5" class="interface"/>
+  <text x="140" y="650" text-anchor="middle" class="class-name">wave</text>
+  <line x1="50" y1="660" x2="230" y2="660" stroke="#6c757d" stroke-width="1"/>
+  <text x="60" y="680" class="method-text">+ open()</text>
+  <text x="60" y="695" class="method-text">+ writeframes()</text>
+  
+  <rect x="50" y="740" width="180" height="80" rx="5" class="interface"/>
+  <text x="140" y="760" text-anchor="middle" class="class-name">unittest</text>
+  <line x1="50" y1="770" x2="230" y2="770" stroke="#6c757d" stroke-width="1"/>
+  <text x="60" y="790" class="method-text">+ TestCase</text>
+  <text x="60" y="805" class="method-text">+ main()</text>
+  
+  <!-- Existing System Integration -->
+  <rect x="700" y="350" width="200" height="120" rx="5" class="abstract-class"/>
+  <text x="800" y="370" text-anchor="middle" class="class-name">AudioConfig</text>
+  <text x="800" y="385" text-anchor="middle" class="small-text">(from constants)</text>
+  <line x1="700" y1="395" x2="900" y2="395" stroke="#34495e" stroke-width="1"/>
+  <text x="710" y="415" class="attribute-text">+ INPUT_SAMPLE_RATE: int</text>
+  <text x="710" y="430" class="attribute-text">+ OUTPUT_SAMPLE_RATE: int</text>
+  <text x="710" y="445" class="attribute-text">+ CHANNELS: int</text>
+  <text x="710" y="460" class="attribute-text">+ FRAME_DURATION: float</text>
+  
+  <rect x="950" y="350" width="200" height="100" rx="5" class="abstract-class"/>
+  <text x="1050" y="370" text-anchor="middle" class="class-name">AudioCodec</text>
+  <text x="1050" y="385" text-anchor="middle" class="small-text">(from audio_codecs)</text>
+  <line x1="950" y1="395" x2="1150" y2="395" stroke="#34495e" stroke-width="1"/>
+  <text x="960" y="415" class="method-text">+ initialize() -> bool</text>
+  <text x="960" y="430" class="method-text">+ get_devices() -> List</text>
+  <text x="960" y="445" class="method-text">+ play_audio() -> bool</text>
+  
+  <rect x="1200" y="350" width="180" height="80" rx="5" class="abstract-class"/>
+  <text x="1290" y="370" text-anchor="middle" class="class-name">Logger</text>
+  <text x="1290" y="385" text-anchor="middle" class="small-text">(from logging_config)</text>
+  <line x1="1200" y1="395" x2="1380" y2="395" stroke="#34495e" stroke-width="1"/>
+  <text x="1210" y="415" class="method-text">+ setup_logging()</text>
+  <text x="1210" y="430" class="method-text">+ getChild()</text>
+  
+  <!-- Utility Functions -->
+  <rect x="700" y="500" width="250" height="120" rx="5" class="config-class"/>
+  <text x="825" y="520" text-anchor="middle" class="class-name">Utility Functions</text>
+  <line x1="700" y1="530" x2="950" y2="530" stroke="#856404" stroke-width="1"/>
+  <text x="710" y="550" class="method-text">+ generate_test_audio_files() -> List[Path]</text>
+  <text x="710" y="565" class="method-text">+ play_test_audio_files(device_id: Optional[int])</text>
+  <text x="720" y="580" class="method-text">-> bool</text>
+  <text x="710" y="595" class="method-text">+ main() -> None</text>
+  <text x="710" y="610" class="method-text">+ argparse configuration</text>
+  
+  <!-- Relationships -->
+  
+  <!-- TestConfig usage -->
+  <line x1="250" y1="150" x2="300" y2="150" class="dependency"/>
+  <text x="275" y="145" class="small-text">uses</text>
+  
+  <line x1="250" y1="170" x2="620" y2="170" class="dependency"/>
+  <text x="435" y="165" class="small-text">uses</text>
+  
+  <!-- Test class composition -->
+  <line x1="400" y1="350" x2="400" y2="300" class="composition"/>
+  <text x="405" y="325" class="small-text">creates</text>
+  
+  <line x1="500" y1="350" x2="700" y2="200" class="composition"/>
+  <text x="600" y="275" class="small-text">creates</text>
+  
+  <line x1="550" y1="350" x2="1000" y2="280" class="composition"/>
+  <text x="775" y="315" class="small-text">creates</text>
+  
+  <!-- External dependencies -->
+  <line x1="230" y1="400" x2="300" y2="250" class="dependency"/>
+  <text x="265" y="325" class="small-text">uses</text>
+  
+  <line x1="230" y1="550" x2="940" y2="200" class="dependency"/>
+  <text x="585" y="375" class="small-text">uses</text>
+  
+  <line x1="230" y1="680" x2="620" y2="200" class="dependency"/>
+  <text x="425" y="440" class="small-text">uses</text>
+  
+  <line x1="230" y1="780" x2="300" y2="500" class="inheritance"/>
+  <text x="265" y="640" class="small-text">extends</text>
+  
+  <!-- Integration with existing system -->
+  <line x1="900" y1="400" x2="950" y2="400" class="association"/>
+  <text x="925" y="395" class="small-text">integrates</text>
+  
+  <line x1="1150" y1="400" x2="1200" y2="400" class="association"/>
+  <text x="1175" y="395" class="small-text">uses</text>
+  
+  <!-- Utility functions relationships -->
+  <line x1="700" y1="550" x2="620" y2="490" class="association"/>
+  <text x="660" y="520" class="small-text">calls</text>
+  
+  <line x1="825" y1="500" x2="825" y2="470" class="association"/>
+  <text x="830" y="485" class="small-text">uses</text>
+  
+  <!-- Legend -->
+  <rect x="1250" y="650" width="320" height="300" fill="none" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="1410" y="670" text-anchor="middle" class="subtitle">类图图例 Legend</text>
+  
+  <!-- Class types -->
+  <rect x="1260" y="690" width="80" height="30" rx="3" class="class-box"/>
+  <text x="1300" y="710" text-anchor="middle" class="small-text">普通类</text>
+  
+  <rect x="1350" y="690" width="80" height="30" rx="3" class="test-class"/>
+  <text x="1390" y="710" text-anchor="middle" class="small-text">测试类</text>
+  
+  <rect x="1440" y="690" width="80" height="30" rx="3" class="config-class"/>
+  <text x="1480" y="710" text-anchor="middle" class="small-text">配置类</text>
+  
+  <rect x="1260" y="730" width="80" height="30" rx="3" class="abstract-class"/>
+  <text x="1300" y="750" text-anchor="middle" class="small-text">抽象类</text>
+  
+  <rect x="1350" y="730" width="80" height="30" rx="3" class="interface"/>
+  <text x="1390" y="750" text-anchor="middle" class="small-text">外部依赖</text>
+  
+  <!-- Relationship types -->
+  <line x1="1260" y1="780" x2="1320" y2="780" class="inheritance"/>
+  <text x="1330" y="785" class="small-text">继承 Inheritance</text>
+  
+  <line x1="1260" y1="800" x2="1320" y2="800" class="composition"/>
+  <text x="1330" y="805" class="small-text">组合 Composition</text>
+  
+  <line x1="1260" y1="820" x2="1320" y2="820" class="aggregation"/>
+  <text x="1330" y="825" class="small-text">聚合 Aggregation</text>
+  
+  <line x1="1260" y1="840" x2="1320" y2="840" class="association"/>
+  <text x="1330" y="845" class="small-text">关联 Association</text>
+  
+  <line x1="1260" y1="860" x2="1320" y2="860" class="dependency"/>
+  <text x="1330" y="865" class="small-text">依赖 Dependency</text>
+  
+  <!-- Method visibility -->
+  <text x="1260" y="890" class="small-text">方法可见性:</text>
+  <text x="1260" y="905" class="small-text">+ public 公有</text>
+  <text x="1260" y="920" class="small-text">- private 私有</text>
+  <text x="1260" y="935" class="small-text"># protected 保护</text>
+</svg>
