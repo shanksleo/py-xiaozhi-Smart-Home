@@ -1,0 +1,142 @@
+<svg width="800" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .box { fill: #e1f5fe; stroke: #01579b; stroke-width: 2; }
+      .decision { fill: #fff3e0; stroke: #e65100; stroke-width: 2; }
+      .process { fill: #e8f5e8; stroke: #2e7d32; stroke-width: 2; }
+      .error { fill: #ffebee; stroke: #c62828; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+      .title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="400" y="30" class="title" style="font-size: 18px;">Smart Home 消息日志上报流程图</text>
+  
+  <!-- WebSocket接收消息 -->
+  <rect x="300" y="60" width="200" height="50" class="box" rx="5"/>
+  <text x="400" y="90" class="text">WebSocket接收消息</text>
+  
+  <!-- 判断消息类型 -->
+  <polygon points="350,140 450,140 480,170 450,200 350,200 320,170" class="decision"/>
+  <text x="400" y="175" class="text">type == 'smart_home'?</text>
+  
+  <!-- 否：正常处理 -->
+  <rect x="520" y="145" width="150" height="50" class="box" rx="5"/>
+  <text x="595" y="175" class="text">正常消息处理流程</text>
+  
+  <!-- 是：解析消息 -->
+  <rect x="300" y="230" width="200" height="50" class="process" rx="5"/>
+  <text x="400" y="260" class="text">解析smart_home消息</text>
+  
+  <!-- 提取关键信息 -->
+  <rect x="300" y="310" width="200" height="50" class="process" rx="5"/>
+  <text x="400" y="335" class="text">提取ha_domain, ha_service</text>
+  <text x="400" y="350" class="text">arguments等信息</text>
+  
+  <!-- 异步创建日志任务 -->
+  <rect x="300" y="390" width="200" height="50" class="process" rx="5"/>
+  <text x="400" y="415" class="text">异步创建日志上报任务</text>
+  <text x="400" y="430" class="text">(不阻塞主流程)</text>
+  
+  <!-- 获取设备信息 -->
+  <rect x="300" y="470" width="200" height="50" class="process" rx="5"/>
+  <text x="400" y="495" class="text">获取设备MAC地址</text>
+  <text x="400" y="510" class="text">(DeviceFingerprint)</text>
+  
+  <!-- 构建日志数据 -->
+  <rect x="300" y="550" width="200" height="50" class="process" rx="5"/>
+  <text x="400" y="575" class="text">构建日志数据结构</text>
+  <text x="400" y="590" class="text">(映射到log_action参数)</text>
+  
+  <!-- 调用日志接口 -->
+  <rect x="300" y="630" width="200" height="50" class="process" rx="5"/>
+  <text x="400" y="655" class="text">调用HomeAssistantRegistrationAPI</text>
+  <text x="400" y="670" class="text">.log_action()接口</text>
+  
+  <!-- 判断调用结果 -->
+  <polygon points="350,710 450,710 480,740 450,770 350,770 320,740" class="decision"/>
+  <text x="400" y="745" class="text">调用成功?</text>
+  
+  <!-- 成功：记录成功日志 -->
+  <rect x="520" y="715" width="150" height="50" class="process" rx="5"/>
+  <text x="595" y="740" class="text">记录成功日志</text>
+  <text x="595" y="755" class="text">更新统计信息</text>
+  
+  <!-- 失败：判断重试次数 -->
+  <polygon points="250,800 350,800 380,830 350,860 250,860 220,830" class="decision"/>
+  <text x="300" y="825" class="text">重试次数</text>
+  <text x="300" y="840" class="text">&lt; MAX_RETRY?</text>
+  
+  <!-- 是：延迟重试 -->
+  <rect x="100" y="805" width="100" height="50" class="process" rx="5"/>
+  <text x="150" y="825" class="text">延迟</text>
+  <text x="150" y="840" class="text">RETRY_DELAY</text>
+  <text x="150" y="855" class="text">秒后重试</text>
+  
+  <!-- 否：记录错误 -->
+  <rect x="400" y="805" width="150" height="50" class="error" rx="5"/>
+  <text x="475" y="825" class="text">记录错误日志</text>
+  <text x="475" y="840" class="text">更新错误统计</text>
+  
+  <!-- 继续主流程 -->
+  <rect x="300" y="890" width="200" height="50" class="box" rx="5"/>
+  <text x="400" y="915" class="text">继续执行主流程</text>
+  <text x="400" y="930" class="text">(parse_command_json)</text>
+  
+  <!-- 连接线 -->
+  <line x1="400" y1="110" x2="400" y2="140" class="arrow"/>
+  <line x1="480" y1="170" x2="520" y2="170" class="arrow"/>
+  <line x1="400" y1="200" x2="400" y2="230" class="arrow"/>
+  <line x1="400" y1="280" x2="400" y2="310" class="arrow"/>
+  <line x1="400" y1="360" x2="400" y2="390" class="arrow"/>
+  <line x1="400" y1="440" x2="400" y2="470" class="arrow"/>
+  <line x1="400" y1="520" x2="400" y2="550" class="arrow"/>
+  <line x1="400" y1="600" x2="400" y2="630" class="arrow"/>
+  <line x1="400" y1="680" x2="400" y2="710" class="arrow"/>
+  <line x1="480" y1="740" x2="520" y2="740" class="arrow"/>
+  <line x1="320" y1="740" x2="300" y2="800" class="arrow"/>
+  <line x1="220" y1="830" x2="150" y2="830" class="arrow"/>
+  <line x1="380" y1="830" x2="400" y2="830" class="arrow"/>
+  
+  <!-- 重试循环 -->
+  <path d="M 150 805 Q 50 750 50 650 Q 50 550 300 630" class="arrow" fill="none"/>
+  
+  <!-- 所有路径最终汇聚 -->
+  <line x1="595" y1="765" x2="595" y2="915" class="arrow"/>
+  <line x1="595" y1="915" x2="500" y2="915" class="arrow"/>
+  <line x1="475" y1="855" x2="475" y2="915" class="arrow"/>
+  <line x1="475" y1="915" x2="400" y2="915" class="arrow"/>
+  
+  <!-- 标注 -->
+  <text x="550" y="160" class="text" style="font-size: 10px;">否</text>
+  <text x="420" y="220" class="text" style="font-size: 10px;">是</text>
+  <text x="520" y="730" class="text" style="font-size: 10px;">是</text>
+  <text x="280" y="780" class="text" style="font-size: 10px;">否</text>
+  <text x="180" y="820" class="text" style="font-size: 10px;">是</text>
+  <text x="420" y="820" class="text" style="font-size: 10px;">否</text>
+  
+  <!-- 关键数据标注 -->
+  <rect x="50" y="50" width="200" height="120" fill="#f5f5f5" stroke="#999" stroke-width="1" rx="3"/>
+  <text x="150" y="70" class="title" style="font-size: 12px;">关键数据记录</text>
+  <text x="60" y="90" class="text" style="font-size: 10px; text-anchor: start;">• 消息接收时间戳</text>
+  <text x="60" y="105" class="text" style="font-size: 10px; text-anchor: start;">• session_id</text>
+  <text x="60" y="120" class="text" style="font-size: 10px; text-anchor: start;">• ha_domain, ha_service</text>
+  <text x="60" y="135" class="text" style="font-size: 10px; text-anchor: start;">• entity_id</text>
+  <text x="60" y="150" class="text" style="font-size: 10px; text-anchor: start;">• 处理耗时</text>
+  <text x="60" y="165" class="text" style="font-size: 10px; text-anchor: start;">• 重试次数</text>
+  
+  <!-- 配置参数标注 -->
+  <rect x="550" y="50" width="200" height="120" fill="#f5f5f5" stroke="#999" stroke-width="1" rx="3"/>
+  <text x="650" y="70" class="title" style="font-size: 12px;">配置参数</text>
+  <text x="560" y="90" class="text" style="font-size: 10px; text-anchor: start;">• MAX_RETRY_COUNT = 3</text>
+  <text x="560" y="105" class="text" style="font-size: 10px; text-anchor: start;">• RETRY_DELAY_SECONDS = 1.0</text>
+  <text x="560" y="120" class="text" style="font-size: 10px; text-anchor: start;">• REQUEST_TIMEOUT = 10s</text>
+  <text x="560" y="135" class="text" style="font-size: 10px; text-anchor: start;">• LOG_LEVEL = INFO</text>
+  <text x="560" y="150" class="text" style="font-size: 10px; text-anchor: start;">• ENABLE_ASYNC_LOGGING</text>
+  <text x="560" y="165" class="text" style="font-size: 10px; text-anchor: start;">• FUNCTION_NAME = 智能家居控制</text>
+</svg>

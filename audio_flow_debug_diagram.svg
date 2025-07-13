@@ -1,0 +1,93 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; fill: #333; }
+      .box { fill: #f0f8ff; stroke: #4682b4; stroke-width: 2; }
+      .error-box { fill: #ffe4e1; stroke: #dc143c; stroke-width: 2; }
+      .success-box { fill: #f0fff0; stroke: #32cd32; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; fill: #333; }
+      .error-text { font-family: Arial, sans-serif; font-size: 12px; fill: #dc143c; font-weight: bold; }
+      .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .error-arrow { stroke: #dc143c; stroke-width: 2; fill: none; marker-end: url(#error-arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+    <marker id="error-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#dc143c" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="25" text-anchor="middle" class="title">语音唤醒后音频流状态管理问题分析</text>
+  
+  <!-- Wake Word Detection -->
+  <rect x="50" y="50" width="150" height="60" class="box" />
+  <text x="125" y="75" text-anchor="middle" class="text">唤醒词检测</text>
+  <text x="125" y="90" text-anchor="middle" class="text">"小智"被识别</text>
+  
+  <!-- Pause Wake Word Detector -->
+  <rect x="250" y="50" width="150" height="60" class="box" />
+  <text x="325" y="75" text-anchor="middle" class="text">暂停唤醒词检测器</text>
+  <text x="325" y="90" text-anchor="middle" class="text">wake_word_detector.pause()</text>
+  
+  <!-- Open Audio Channel -->
+  <rect x="450" y="50" width="150" height="60" class="box" />
+  <text x="525" y="75" text-anchor="middle" class="text">打开音频通道</text>
+  <text x="525" y="90" text-anchor="middle" class="text">websocket_protocol</text>
+  
+  <!-- Clear Audio Buffer -->
+  <rect x="50" y="150" width="150" height="60" class="box" />
+  <text x="125" y="175" text-anchor="middle" class="text">清空音频缓冲区</text>
+  <text x="125" y="190" text-anchor="middle" class="text">clear_audio_queue()</text>
+  
+  <!-- Reinitialize Input Stream -->
+  <rect x="250" y="150" width="150" height="60" class="box" />
+  <text x="325" y="175" text-anchor="middle" class="text">重新初始化输入流</text>
+  <text x="325" y="190" text-anchor="middle" class="text">reinitialize_stream()</text>
+  
+  <!-- Resume Audio Input - ERROR POINT -->
+  <rect x="450" y="150" width="150" height="60" class="error-box" />
+  <text x="525" y="175" text-anchor="middle" class="error-text">恢复音频输入</text>
+  <text x="525" y="190" text-anchor="middle" class="error-text">resume_input() - 错误点</text>
+  
+  <!-- Error Details -->
+  <rect x="50" y="250" width="550" height="100" class="error-box" />
+  <text x="325" y="275" text-anchor="middle" class="error-text">错误详情：AttributeError: 'InputStream' object has no attribute 'is_active'</text>
+  <text x="325" y="295" text-anchor="middle" class="text">问题根源：代码中使用了错误的方法名</text>
+  <text x="325" y="315" text-anchor="middle" class="text">错误用法：self.input_stream.is_active() ❌</text>
+  <text x="325" y="335" text-anchor="middle" class="text">正确用法：self.input_stream.active ✅</text>
+  
+  <!-- Solution -->
+  <rect x="50" y="380" width="250" height="80" class="success-box" />
+  <text x="175" y="405" text-anchor="middle" class="text">解决方案</text>
+  <text x="175" y="425" text-anchor="middle" class="text">修复所有使用is_active()的地方</text>
+  <text x="175" y="445" text-anchor="middle" class="text">改为使用.active属性</text>
+  
+  <!-- Impact -->
+  <rect x="350" y="380" width="250" height="80" class="box" />
+  <text x="475" y="405" text-anchor="middle" class="text">影响范围</text>
+  <text x="475" y="425" text-anchor="middle" class="text">audio_codec.py (6处)</text>
+  <text x="475" y="445" text-anchor="middle" class="text">vad_detector.py (1处)</text>
+  
+  <!-- Result -->
+  <rect x="200" y="500" width="200" height="60" class="success-box" />
+  <text x="300" y="525" text-anchor="middle" class="text">修复后结果</text>
+  <text x="300" y="540" text-anchor="middle" class="text">音频输入可正常恢复</text>
+  
+  <!-- Arrows -->
+  <line x1="200" y1="80" x2="240" y2="80" class="arrow" />
+  <line x1="400" y1="80" x2="440" y2="80" class="arrow" />
+  <line x1="125" y1="110" x2="125" y2="140" class="arrow" />
+  <line x1="200" y1="180" x2="240" y2="180" class="arrow" />
+  <line x1="400" y1="180" x2="440" y2="180" class="arrow" />
+  <line x1="525" y1="210" x2="525" y2="240" class="error-arrow" />
+  <line x1="175" y1="460" x2="175" y2="490" class="arrow" />
+  <line x1="200" y1="530" x2="240" y2="530" class="arrow" />
+  
+  <!-- Code locations -->
+  <text x="650" y="280" class="text">错误位置：</text>
+  <text x="650" y="300" class="text">audio_codec.py:388</text>
+  <text x="650" y="320" class="text">audio_codec.py:319,340,372,381,395</text>
+  <text x="650" y="340" class="text">vad_detector.py:215</text>
+</svg>

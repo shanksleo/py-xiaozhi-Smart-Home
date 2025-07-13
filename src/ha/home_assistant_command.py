@@ -9,7 +9,7 @@ import time
 import json
 import requests
 
-from src.ha.ha_data import ha_service_data
+from src.ha.ha_data import ha_service_data, ha_device_data
 
 use_SSL = ha_service_data["use_ssl"]
 protocol_suffix = 's' if use_SSL else ''
@@ -156,114 +156,244 @@ class HomeAssistantControlDemo:
         """开启空气净化器"""
         return self.call_service("fan", "turn_off", entity_id)
 
-    def demo_control_devices(self, demo_devices, interval=10):
+    def demo_control_devices(self, demo_devices, interval=10, device_keys=None):
         """
-        演示控制设备
+        演示控制设备 - 支持通过设备key或完整设备字典进行控制
 
         参数:
-            demo_devices: 设备字典
+            demo_devices: 设备字典 (key -> entity_id)
             interval: 操作间隔时间(秒)
+            device_keys: 要测试的设备key列表，如果为None则测试所有设备
         """
         print("\n" + "=" * 50)
-        print("设备控制演示")
+        print("智能家居设备控制演示")
+        print("=" * 50)
+        
+        # 设备类型映射表
+        device_type_mapping = {
+            'light': {'domain': 'light', 'friendly_name': '灯光'},
+            'air_conditioner': {'domain': 'climate', 'friendly_name': '空调'},
+            'curtain': {'domain': 'cover', 'friendly_name': '窗帘'},
+            'smart_switch': {'domain': 'switch', 'friendly_name': '智能开关'},
+            'tv': {'domain': 'button', 'friendly_name': '电视'},
+            'air_clean': {'domain': 'fan', 'friendly_name': '空气净化器'}
+        }
+        
+        # 如果指定了device_keys，只测试指定的设备
+        if device_keys:
+            test_devices = {key: demo_devices[key] for key in device_keys if key in demo_devices}
+            print(f"测试指定设备: {list(test_devices.keys())}")
+        else:
+            test_devices = demo_devices
+            print(f"测试所有设备: {list(test_devices.keys())}")
+        
+        print(f"设备总数: {len(test_devices)}")
+        print(f"操作间隔: {interval}秒")
         print("=" * 50)
 
-        print("请先填写上面的 entity_id，然后运行演示")
-        print("示例格式：")
-        print("- 灯: light.living_room_light")
-        print("- 空调: climate.bedroom_ac")
-        print("- 窗帘: cover.bedroom_curtain")
-        print("- 智能开关: switch.speaker_power")
+        # 遍历设备进行控制演示
+        for device_key, entity_id in test_devices.items():
+            if not entity_id or "你的" in entity_id:
+                print(f"\n⚠️  跳过设备 {device_key}: entity_id 未配置")
+                continue
+                
+            device_info = device_type_mapping.get(device_key, {'domain': 'unknown', 'friendly_name': device_key})
+            friendly_name = device_info['friendly_name']
+            domain = device_info['domain']
+            
+            print(f"\n🏠 --- 控制 {friendly_name} ({device_key}) ---")
+            print(f"📋 Entity ID: {entity_id}")
+            print(f"🔧 Domain: {domain}")
+            
+            try:
+                # 根据设备类型执行相应的控制逻辑
+                if device_key == 'light':
+                    self._control_light(entity_id, interval)
+                elif device_key == 'air_conditioner':
+                    self._control_air_conditioner(entity_id, interval)
+                elif device_key == 'curtain':
+                    self._control_curtain(entity_id, interval)
+                elif device_key == 'smart_switch':
+                    self._control_smart_switch(entity_id, interval)
+                elif device_key == 'tv':
+                    self._control_tv(entity_id, interval)
+                elif device_key == 'air_clean':
+                    self._control_air_cleaner(entity_id, interval)
+                else:
+                    print(f"⚠️  未知设备类型: {device_key}")
+                    
+            except Exception as e:
+                print(f"❌ 控制设备 {friendly_name} 时发生错误: {str(e)}")
+                
+            print(f"✅ {friendly_name} 控制完成")
 
-        # 演示控制（需要先填写 entity_id）
-        for device_name, entity_id in demo_devices.items():
-            if "你的" not in entity_id:  # 如果已经填写了真实的 entity_id
-                device = device_name
-                print(f"\n--- 控制 {device} ---")
-
-                if device_name == "灯":
-                    print("开灯...")
-                    self.light_on(entity_id)
-                    time.sleep(interval)
-                    print("关灯...")
-                    # self.light_off(entity_id)
-
-                elif device_name == "空调":
-                    print("开空调...")
-                    self.ac_on(entity_id)
-                    print("设置吹风模式...")
-                    self.ac_set_mode(entity_id, "fan_only")
-                    print("设置温度25度...")
-                    self.ac_set_temp(entity_id, 25)
-                    time.sleep(interval)
-                    print("关空调...")
-                    self.ac_off(entity_id)
-
-                elif device_name == "窗帘":
-                    print("关闭窗帘...")
-                    self.curtain_close(entity_id)
-                    time.sleep(interval)
-                    print("打开窗帘...")
-                    self.curtain_open(entity_id)
-
-                elif device_name == "智能开关":
-                    print("开启开关...")
-                    self.switch_on(entity_id)
-                    time.sleep(interval)
-                    print("关闭开关...")
-                    self.switch_off(entity_id)
-
-                elif device_name == "tv_on":
-                    entity = entity_id
-                    print(f"开启开关...{entity}")
-                    self.tv_on(entity_id)
-                    # time.sleep(interval)
-                    # print("关闭开关...")
-                    # self.tv_off(entity_id)
-
-                elif device_name == "tv_off":
-                    print("关闭电视...")
-                    self.tv_off(entity_id)
-
-
-
-        print("\n演示完成！")
+        print("\n" + "=" * 50)
+        print("🎉 所有设备演示完成！")
+        print("=" * 50)
+        
+    def _control_light(self, entity_id, interval):
+        """控制灯光设备"""
+        print("💡 开启灯光...")
+        result = self.light_on(entity_id)
+        if result:
+            print("✅ 灯光已开启")
+        time.sleep(interval // 2)
+        
+        print("🔆 设置亮度为150...")
+        self.light_set_brightness(entity_id, 150)
+        time.sleep(interval // 2)
+        
+        print("💡 关闭灯光...")
+        result = self.light_off(entity_id)
+        if result:
+            print("✅ 灯光已关闭")
+            
+    def _control_air_conditioner(self, entity_id, interval):
+        """控制空调设备"""
+        print("❄️ 开启空调...")
+        result = self.ac_on(entity_id)
+        if result:
+            print("✅ 空调已开启")
+            
+        print("🌪️ 设置为送风模式...")
+        self.ac_set_mode(entity_id, "fan_only")
+        
+        print("🌡️ 设置温度为25度...")
+        self.ac_set_temp(entity_id, 25)
+        time.sleep(interval)
+        
+        print("❄️ 关闭空调...")
+        result = self.ac_off(entity_id)
+        if result:
+            print("✅ 空调已关闭")
+            
+    def _control_curtain(self, entity_id, interval):
+        """控制窗帘设备"""
+        print("🪟 关闭窗帘...")
+        result = self.curtain_close(entity_id)
+        if result:
+            print("✅ 窗帘已关闭")
+        time.sleep(interval)
+        
+        print("🪟 打开窗帘...")
+        result = self.curtain_open(entity_id)
+        if result:
+            print("✅ 窗帘已打开")
+            
+    def _control_smart_switch(self, entity_id, interval):
+        """控制智能开关设备"""
+        print("🔌 开启智能开关...")
+        result = self.switch_on(entity_id)
+        if result:
+            print("✅ 智能开关已开启")
+        time.sleep(interval)
+        
+        print("🔌 关闭智能开关...")
+        result = self.switch_off(entity_id)
+        if result:
+            print("✅ 智能开关已关闭")
+            
+    def _control_tv(self, entity_id, interval):
+        """控制电视设备"""
+        print("📺 操作电视按钮...")
+        result = self.tv_on(entity_id)
+        if result:
+            print("✅ 电视按钮操作完成")
+        time.sleep(interval)
+        
+    def _control_air_cleaner(self, entity_id, interval):
+        """控制空气净化器设备"""
+        print("🌬️ 开启空气净化器...")
+        result = self.air_cleaner_on(entity_id)
+        if result:
+            print("✅ 空气净化器已开启")
+        time.sleep(interval)
+        
+        print("🌬️ 关闭空气净化器...")
+        result = self.air_cleaner_off(entity_id)
+        if result:
+            print("✅ 空气净化器已关闭")
 
 
 def main():
-    """主函数"""
-    # 配置信息
+    """主函数 - 智能家居设备控制演示"""
+    
+    # ==================== 配置参数 ====================
+    # 测试间隔时间(秒)
+    TEST_INTERVAL = 5
+    
+    # 指定要测试的设备key列表，None表示测试所有设备
+    # 可选值: ['light', 'air_conditioner', 'curtain', 'smart_switch', 'tv', 'air_clean']
+    SPECIFIC_DEVICE_KEYS = None  # 例如: ['air_clean', 'light'] 只测试空气净化器和灯光
+    
+    # 是否启用详细日志
+    VERBOSE_LOGGING = True
+    
+    # ==================== 系统配置 ====================
     server = ha_service_data["host"]
-    port =  ha_service_data["port"]
-    LONG_LIVED_TOKEN = ha_service_data["token"]
-    # 请在这里填写你的设备 entity_id
-    demo_devices = {
-       "air_clean": "fan.fan.zhimi_cn_287827089_ma2_s_2_air_purifier",
-        # "灯": "light.ftd_cn_1123337548_ftdlmp_s_2_light",
-        # "tv_on": "button.xiaomi_cn_885441719_rmi1_turn_on_a_6_1",
-        # "tv_off":"button.xiaomi_cn_885441719_rmi1_turn_off_a_7_1"
-        # "空调": "climate.scdvb_cn_1102732000_acm",
-        # "窗帘": "cover.xiaomi_cn_708478375_acn009_s_2_curtain",
-        # "智能开关": "switch.090615_cn_792978759_akpro4_on_p_2_1"
-    }
-
-    print("Home Assistant 设备控制演示")
-    server_val = server
-    port_val = port
-    print(f"服务器地址: {server_val}:{port_val}")
-    print("=" * 50)
+    port = ha_service_data["port"]
+    token = ha_service_data["token"]
+    
+    # 使用统一的设备数据
+    demo_devices = ha_device_data
+    
+    print("🏠 智能家居设备控制演示系统")
+    print("=" * 60)
+    print(f"🌐 服务器地址: {server}:{port}")
+    print(f"📱 设备总数: {len(demo_devices)}")
+    print(f"⏱️  测试间隔: {TEST_INTERVAL}秒")
+    
+    if SPECIFIC_DEVICE_KEYS:
+        print(f"🎯 指定测试设备: {SPECIFIC_DEVICE_KEYS}")
+    else:
+        print("🎯 测试模式: 全部设备")
+        
+    print(f"📋 可用设备列表: {list(demo_devices.keys())}")
+    print("=" * 60)
+    
+    if VERBOSE_LOGGING:
+        print("📊 设备详细信息:")
+        for key, entity_id in demo_devices.items():
+            print(f"  • {key}: {entity_id}")
+        print("=" * 60)
 
     # 创建演示实例
+    print("🔧 初始化Home Assistant控制器...")
     demo = HomeAssistantControlDemo(server, port)
-    demo.set_token(LONG_LIVED_TOKEN)
+    demo.set_token(token)
 
-    # 检查连接
+    # 检查API连接
+    print("🔍 检查API连接状态...")
     if not demo.check_api():
-        print("API连接失败，请检查网络和令牌")
+        print("❌ API连接失败，请检查以下项目:")
+        print("   1. 网络连接是否正常")
+        print("   2. Home Assistant服务是否运行")
+        print("   3. 访问令牌是否有效")
+        print(f"   4. 服务器地址是否正确: {server}:{port}")
         return
 
-    # 运行演示
-    demo.demo_control_devices(demo_devices, interval=10)
+    print("✅ API连接成功，开始设备控制演示...")
+    print("\n" + "🚀 " + "=" * 58)
+    
+    try:
+        # 运行设备控制演示
+        demo.demo_control_devices(
+            demo_devices=demo_devices, 
+            interval=TEST_INTERVAL,
+            device_keys=SPECIFIC_DEVICE_KEYS
+        )
+        
+        print("\n" + "=" * 60)
+        print("🎉 演示程序执行完成！")
+        print("💡 提示: 可以修改main()函数中的配置参数来自定义测试行为")
+        print("=" * 60)
+        
+    except KeyboardInterrupt:
+        print("\n\n⚠️  用户中断演示程序")
+        print("👋 程序已安全退出")
+    except Exception as e:
+        print(f"\n❌ 演示过程中发生错误: {str(e)}")
+        print("🔧 请检查设备配置和网络连接")
 
 
 if __name__ == "__main__":
