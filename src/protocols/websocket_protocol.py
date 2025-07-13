@@ -141,8 +141,8 @@ class WebsocketProtocol(Protocol):
                             parse_command_json(data)
                             logger.info(f"smart_home data = {data}")
                             # 收到 smart_home 消息后主动断开 websocket 连接
-                            # logger.info("收到 smart_home 消息，主动断开 websocket 连接")
-                            # asyncio.create_task(self.close_audio_channel())
+                            logger.info("收到 smart_home 消息，主动断开 websocket 连接")
+                            asyncio.create_task(self.close_audio_channel())
                         else:
                             if self._on_incoming_json:
                                 self._on_incoming_json(data)
