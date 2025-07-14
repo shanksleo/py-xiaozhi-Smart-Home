@@ -15,6 +15,11 @@ PROTOCOL="websocket"              # 通信协议: mqtt 或 websocket
 SKIP_ACTIVATION="false"           # 是否跳过激活: true 或 false
 
 echo $(whoami)
+
+echo $SHELL
+
+source /home/tianjiao/.bashrc
+
 # ==================== 函数定义 ====================
 
 # 输出带时间戳的日志信息
