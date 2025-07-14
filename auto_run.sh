@@ -1,17 +1,13 @@
 #!/bin/bash
 
 # py-xiaozhi Smart Home 自动启动脚本
-# 优化版本 - 基于用户系统环境配置
+# 简化版本 - 直接使用 Conda 环境中的 Python
 
 # ==================== 系统环境配置 ====================
-# Conda 环境路径
-CONDA_PATH="/home/tianjiao/miniconda3/condabin/conda"
-# Python 解释器路径
+# Conda 环境中的 Python 解释器路径（直接使用，无需激活）
 PYTHON_PATH="/home/tianjiao/miniconda3/envs/py-xiaozhi/bin/python3"
 # 项目路径
 PROJECT_DIR="/home/tianjiao/originXiaoZhi/py-xiaozhi-Smart-Home"
-# Conda 环境名称
-CONDA_ENV_NAME="py-xiaozhi"
 
 # ==================== 启动参数配置 ====================
 RUN_MODE="cli"                    # 运行模式: gui 或 cli
@@ -53,9 +49,6 @@ check_path() {
 check_environment() {
     log_info "🔍 开始检查系统环境..."
     
-    # 检查 Conda 路径
-    check_path "$CONDA_PATH" "file"
-    
     # 检查 Python 路径
     check_path "$PYTHON_PATH" "file"
     
@@ -68,24 +61,30 @@ check_environment() {
     log_info "✅ 系统环境检查完成"
 }
 
-# 激活 Conda 环境
-activate_conda_env() {
-    log_info "🔧 激活 Conda 环境: $CONDA_ENV_NAME"
+# 验证 Python 环境
+verify_python_env() {
+    log_info "🔧 验证 Python 环境..."
     
-    # 使用指定路径的 conda 命令激活环境
-    eval "$($CONDA_PATH shell.bash hook)"
+    # 检查 Python 版本
+    local python_version
+    python_version=$("$PYTHON_PATH" --version 2>&1)
+    log_info "Python 版本: $python_version"
     
-    # 激活指定环境
-    if ! $CONDA_PATH activate "$CONDA_ENV_NAME"; then
-        log_error "无法激活 Conda 环境: $CONDA_ENV_NAME"
+    # 检查是否在正确的 Conda 环境中
+    local conda_env
+    conda_env=$("$PYTHON_PATH" -c "import sys; print(sys.prefix)" 2>/dev/null)
+    if [[ "$conda_env" == *"py-xiaozhi"* ]]; then
+        log_info "✅ 确认使用 py-xiaozhi 环境: $conda_env"
+    else
+        log_info "⚠️ Python 环境路径: $conda_env"
     fi
     
-    # 验证环境是否正确激活
-    if [ "$CONDA_DEFAULT_ENV" != "$CONDA_ENV_NAME" ]; then
-        log_error "Conda 环境激活验证失败，当前环境: $CONDA_DEFAULT_ENV，期望环境: $CONDA_ENV_NAME"
+    # 测试基本 Python 功能
+    if "$PYTHON_PATH" -c "import sys; print('Python 环境正常')" 2>/dev/null; then
+        log_info "✅ Python 环境验证成功"
+    else
+        log_error "Python 环境验证失败"
     fi
-    
-    log_info "✅ Conda 环境激活成功: $CONDA_DEFAULT_ENV"
 }
 
 # 启动应用程序
@@ -105,8 +104,10 @@ start_application() {
     
     log_info "启动参数: $cmd_args"
     log_info "使用 Python 解释器: $PYTHON_PATH"
+    log_info "工作目录: $(pwd)"
     
     # 启动应用
+    log_info "正在启动应用程序..."
     if ! "$PYTHON_PATH" main.py $cmd_args; then
         log_error "应用启动失败"
     fi
@@ -122,8 +123,8 @@ main() {
     
     echo "==========================================="
     
-    # 激活 Conda 环境
-    activate_conda_env
+    # 验证 Python 环境
+    verify_python_env
     
     echo "==========================================="
     
@@ -134,9 +135,6 @@ main() {
 }
 
 # ==================== 脚本执行 ====================
-
-# 设置错误时退出
-set -e
 
 # 执行主函数
 main "$@"
