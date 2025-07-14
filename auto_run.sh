@@ -20,6 +20,10 @@ echo $SHELL
 
 source /home/tianjiao/.bashrc
 
+# 脚本内容
+echo "当前 shell: $SHELL"
+echo "实际执行 shell: $(ps -p $$ -o comm=)"
+
 # ==================== 函数定义 ====================
 
 # 输出带时间戳的日志信息
