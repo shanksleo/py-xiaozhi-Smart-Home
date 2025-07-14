@@ -7,7 +7,7 @@
 # Conda 环境路径
 CONDA_PATH="/home/tianjiao/miniconda3/condabin/conda"
 # Python 解释器路径
-PYTHON_PATH="/usr/bin/python3"
+PYTHON_PATH="/home/tianjiao/miniconda3/envs/py-xiaozhi/bin/python3"
 # 项目路径
 PROJECT_DIR="/home/tianjiao/originXiaoZhi/py-xiaozhi-Smart-Home"
 # Conda 环境名称
