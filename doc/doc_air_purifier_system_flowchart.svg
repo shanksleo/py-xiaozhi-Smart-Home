@@ -1,0 +1,59 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold">空气净化器设备指令处理流程</text>
+  
+  <!-- WebSocket接收 -->
+  <rect x="50" y="60" width="150" height="60" rx="10" fill="#e1f5fe" stroke="#01579b" stroke-width="2"/>
+  <text x="125" y="85" text-anchor="middle" font-size="12" font-weight="bold">WebSocket Protocol</text>
+  <text x="125" y="105" text-anchor="middle" font-size="10">接收服务器指令</text>
+  
+  <!-- 命令解析 -->
+  <rect x="250" y="60" width="150" height="60" rx="10" fill="#f3e5f5" stroke="#4a148c" stroke-width="2"/>
+  <text x="325" y="85" text-anchor="middle" font-size="12" font-weight="bold">parse_command_json</text>
+  <text x="325" y="105" text-anchor="middle" font-size="10">解析JSON命令</text>
+  
+  <!-- 设备类型判断 -->
+  <polygon points="450,60 550,90 450,120 350,90" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+  <text x="450" y="85" text-anchor="middle" font-size="12" font-weight="bold">设备类型</text>
+  <text x="450" y="105" text-anchor="middle" font-size="10">ha_domain=fan?</text>
+  
+  <!-- 命令映射 -->
+  <rect x="600" y="60" width="150" height="60" rx="10" fill="#e8f5e8" stroke="#1b5e20" stroke-width="2"/>
+  <text x="675" y="85" text-anchor="middle" font-size="12" font-weight="bold">Command Mapping</text>
+  <text x="675" y="105" text-anchor="middle" font-size="10">turn_on/turn_off</text>
+  
+  <!-- API调用 -->
+  <rect x="300" y="180" width="200" height="60" rx="10" fill="#fce4ec" stroke="#880e4f" stroke-width="2"/>
+  <text x="400" y="205" text-anchor="middle" font-size="12" font-weight="bold">HomeAssistantCommandAPI</text>
+  <text x="400" y="225" text-anchor="middle" font-size="10">command_device(fan, ON/OFF)</text>
+  
+  <!-- 具体执行 -->
+  <rect x="300" y="300" width="200" height="60" rx="10" fill="#e0f2f1" stroke="#004d40" stroke-width="2"/>
+  <text x="400" y="325" text-anchor="middle" font-size="12" font-weight="bold">HomeAssistantControlDemo</text>
+  <text x="400" y="345" text-anchor="middle" font-size="10">air_cleaner_on/off</text>
+  
+  <!-- Home Assistant API -->
+  <rect x="300" y="420" width="200" height="60" rx="10" fill="#fff8e1" stroke="#ff6f00" stroke-width="2"/>
+  <text x="400" y="445" text-anchor="middle" font-size="12" font-weight="bold">Home Assistant API</text>
+  <text x="400" y="465" text-anchor="middle" font-size="10">call_service(fan, turn_on/off)</text>
+  
+  <!-- 连接线 -->
+  <line x1="200" y1="90" x2="250" y2="90" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="90" x2="350" y2="90" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="550" y1="90" x2="600" y2="90" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="675" y1="120" x2="675" y2="140" stroke="#333" stroke-width="2"/>
+  <line x1="675" y1="140" x2="400" y2="140" stroke="#333" stroke-width="2"/>
+  <line x1="400" y1="140" x2="400" y2="180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="240" x2="400" y2="300" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="360" x2="400" y2="420" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 标注 -->
+  <text x="60" y="150" font-size="10" fill="#666">JSON: {ha_domain: "fan", ha_service: "turn_off"}</text>
+  <text x="520" y="150" font-size="10" fill="#666">entity_id: fan.xiaomi_cn_*</text>
+</svg>

@@ -1,0 +1,76 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 标题 -->
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold">空气净化器设备控制类图</text>
+  
+  <!-- WebSocketProtocol类 -->
+  <rect x="50" y="60" width="200" height="120" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="150" y="80" text-anchor="middle" font-size="14" font-weight="bold">WebSocketProtocol</text>
+  <line x1="50" y1="90" x2="250" y2="90" stroke="#1976d2" stroke-width="1"/>
+  <text x="60" y="110" font-size="10">- websocket: WebSocket</text>
+  <text x="60" y="125" font-size="10">- config_manager: ConfigManager</text>
+  <line x1="50" y1="135" x2="250" y2="135" stroke="#1976d2" stroke-width="1"/>
+  <text x="60" y="155" font-size="10">+ on_message(message)</text>
+  <text x="60" y="170" font-size="10">+ handle_smart_home(data)</text>
+  
+  <!-- HACommandService模块 -->
+  <rect x="300" y="60" width="200" height="120" fill="#e8f5e8" stroke="#388e3c" stroke-width="2"/>
+  <text x="400" y="80" text-anchor="middle" font-size="14" font-weight="bold">HACommandService</text>
+  <line x1="300" y1="90" x2="500" y2="90" stroke="#388e3c" stroke-width="1"/>
+  <text x="310" y="110" font-size="10">+ parse_command_json(data)</text>
+  <text x="310" y="125" font-size="10">+ command_map: dict</text>
+  <line x1="300" y1="135" x2="500" y2="135" stroke="#388e3c" stroke-width="1"/>
+  <text x="310" y="155" font-size="10">+ 新增: fan domain支持</text>
+  <text x="310" y="170" font-size="10">+ 新增: turn_on/turn_off映射</text>
+  
+  <!-- HomeAssistantCommandAPI类 -->
+  <rect x="550" y="60" width="200" height="120" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="650" y="80" text-anchor="middle" font-size="14" font-weight="bold">HomeAssistantCommandAPI</text>
+  <line x1="550" y1="90" x2="750" y2="90" stroke="#f57c00" stroke-width="1"/>
+  <text x="560" y="110" font-size="10">- demo: ControlDemo</text>
+  <line x1="550" y1="120" x2="750" y2="120" stroke="#f57c00" stroke-width="1"/>
+  <text x="560" y="140" font-size="10">+ command_device(type, cmd)</text>
+  <text x="560" y="155" font-size="10">+ 新增: fan类型处理</text>
+  <text x="560" y="170" font-size="10">+ 新增: air_purifier分支</text>
+  
+  <!-- HomeAssistantControlDemo类 -->
+  <rect x="300" y="220" width="200" height="140" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="400" y="240" text-anchor="middle" font-size="14" font-weight="bold">HomeAssistantControlDemo</text>
+  <line x1="300" y1="250" x2="500" y2="250" stroke="#c2185b" stroke-width="1"/>
+  <text x="310" y="270" font-size="10">- host: str</text>
+  <text x="310" y="285" font-size="10">- port: int</text>
+  <text x="310" y="300" font-size="10">- token: str</text>
+  <line x1="300" y1="310" x2="500" y2="310" stroke="#c2185b" stroke-width="1"/>
+  <text x="310" y="330" font-size="10">+ air_cleaner_on(entity_id)</text>
+  <text x="310" y="345" font-size="10">+ air_cleaner_off(entity_id)</text>
+  <text x="310" y="360" font-size="10">+ call_service(domain, service)</text>
+  
+  <!-- 关系连线 -->
+  <line x1="250" y1="120" x2="300" y2="120" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="275" y="115" text-anchor="middle" font-size="9">调用</text>
+  
+  <line x1="500" y1="120" x2="550" y2="120" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="525" y="115" text-anchor="middle" font-size="9">创建</text>
+  
+  <line x1="650" y1="180" x2="650" y2="200" stroke="#333" stroke-width="2"/>
+  <line x1="650" y1="200" x2="400" y2="200" stroke="#333" stroke-width="2"/>
+  <line x1="400" y1="200" x2="400" y2="220" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="525" y="195" text-anchor="middle" font-size="9">使用</text>
+  
+  <!-- 新增功能标注 -->
+  <rect x="50" y="400" width="700" height="150" fill="#f0f8ff" stroke="#4682b4" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="60" y="420" font-size="14" font-weight="bold" fill="#4682b4">新增功能实现</text>
+  
+  <text x="60" y="445" font-size="12" font-weight="bold">1. HACommandService扩展：</text>
+  <text x="70" y="460" font-size="10">• command_map新增fan domain的turn_on/turn_off映射</text>
+  <text x="70" y="475" font-size="10">• parse_command_json函数支持fan类型设备</text>
+  
+  <text x="60" y="500" font-size="12" font-weight="bold">2. HomeAssistantCommandAPI扩展：</text>
+  <text x="70" y="515" font-size="10">• command_device方法新增air_purifier/fan设备类型处理</text>
+  <text x="70" y="530" font-size="10">• 支持ON/OFF命令映射到air_cleaner_on/off方法</text>
+  
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+</svg>

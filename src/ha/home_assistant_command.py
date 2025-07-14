@@ -150,10 +150,12 @@ class HomeAssistantControlDemo:
 
     def air_cleaner_on(self, entity_id):
         """开启空气净化器"""
+        logging.info(f"[HomeAssistantControlDemo] 开启空气净化器: {entity_id}")
         return self.call_service("fan", "turn_on", entity_id)
 
     def air_cleaner_off(self, entity_id):
-        """开启空气净化器"""
+        """关闭空气净化器"""
+        logging.info(f"[HomeAssistantControlDemo] 关闭空气净化器: {entity_id}")
         return self.call_service("fan", "turn_off", entity_id)
 
     def demo_control_devices(self, demo_devices, interval=10, device_keys=None):

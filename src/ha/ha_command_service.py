@@ -7,23 +7,13 @@ from src.ha.home_assistant_command import HomeAssistantControlDemo
 
 def parse_command_json(json_data):
     """
-    解析智能家居命令的 JSON 数据并执行相应的设备控制
+    解析智能家居命令JSON数据
     
-    参数:
-        json_data (dict): 包含智能家居命令的 JSON 数据
+    Args:
+        json_data (dict): 包含智能家居命令的JSON数据
         
-    示例 JSON 格式:
-    {
-        'session_id': 'cbe64e3e-4975-4a2e-8a04-5a412bbbb38d', 
-        'type': 'smart_home', 
-        'payload': {
-            'ha_domain': 'light', 
-            'ha_service': 'turn_on', 
-            'arguments': {
-                'entity_id': 'light.ftd_cn_1123337548_ftdlmp_s_2_light'
-            }
-        }
-    }
+    Returns:
+        bool: 命令执行是否成功
     """
     try:
         data_str = json_data
@@ -61,6 +51,7 @@ def parse_command_json(json_data):
         logging.info(f"接收到命令: 设备类型={domain}, 服务={service}, 参数={args}")
         
         # 将 ha_service 转换为设备命令格式
+        # 命令映射字典
         command_map = {
             # 通用命令
             'turn_on': 'ON',
@@ -81,6 +72,10 @@ def parse_command_json(json_data):
             'set_brightness': 'set_brightness',  # 设置亮度
             'set_color': 'set_color',           # 设置颜色
             
+            # 空气净化器特定命令 (fan domain)
+            'turn_on': 'ON',                    # 开启空气净化器
+            'turn_off': 'OFF',                  # 关闭空气净化器
+            
             # 电视特定命令
             'press': 'PRESS'              # 按下按钮
         }
@@ -90,6 +85,9 @@ def parse_command_json(json_data):
             service = ha_service
             logging.error(f"不支持的服务: {service}")
             return False
+        
+        entity_id = arguments.get('entity_id', 'unknown')
+        logging.info(f"[HACommandService] 解析 命令: {ha_service}, 设备ID: {entity_id}")
         
         # 创建 HomeAssistant API 实例并执行命令
         ha_command_api = HomeAssistantCommandAPI()
@@ -216,6 +214,8 @@ class HomeAssistantCommandAPI:
             elif device_command == "OFF":
                 print("关闭开关...")
                 self.demo.switch_off(entity_id)
+
+        
 
 
 if __name__ == "__main__":
