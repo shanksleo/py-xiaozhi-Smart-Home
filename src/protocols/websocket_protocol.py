@@ -122,8 +122,8 @@ class WebsocketProtocol(Protocol):
             return False
 
     async def delayed_close_audio_channel(self):
-        logger.info("准备在10秒后关闭音频通道")
-        await asyncio.sleep(10)  # 延迟10秒
+        logger.info("准备在20秒后关闭音频通道")
+        await asyncio.sleep(20)  # 延迟10秒
         await self.close_audio_channel()
         logger.info("音频通道已关闭")
     async def _message_handler(self):
