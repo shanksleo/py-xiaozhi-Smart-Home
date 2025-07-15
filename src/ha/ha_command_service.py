@@ -59,7 +59,7 @@ def parse_command_json(json_data):
         service = ha_service
         args = arguments
         logging.info(f"接收到命令: 设备类型={domain}, 服务={service}, 参数={args}")
-        
+        print(f"接收到命令: 设备类型={domain}, 服务={service}, 参数={args}")
         # 将 ha_service 转换为设备命令格式
         command_map = {
             # 通用命令
@@ -113,10 +113,12 @@ class HomeAssistantCommandAPI:
         if not self.demo.check_api():
             print("API连接失败，请检查网络和令牌")
             return
-
+        print(f"device_type = {device_type}")
+        print(f"device_command = {device_command}")
+        print(f"params = {params}")
         # 优先使用用户提供的实体 ID
         entity_id = params.get('entity_id')
-        
+        print(f"entity_id = {entity_id}")
         # 如果用户没有提供实体 ID，则使用预定义的实体 ID
         if not entity_id:
             if device_type not in ha_device_data.keys():
@@ -217,6 +219,13 @@ class HomeAssistantCommandAPI:
                 print("关闭开关...")
                 self.demo.switch_off(entity_id)
 
+        elif device_type == "fan":
+            if device_command == "ON":
+                print("打开空气净化器...")
+                self.demo.air_cleaner_on(entity_id)
+            elif device_command == "OFF":
+                print("关闭空气净化器...")
+                self.demo.air_cleaner_off(entity_id)
 
 if __name__ == "__main__":
     # 示例1：解析命令JSON
