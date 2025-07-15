@@ -1,8 +1,8 @@
 import logging
-import time
 
 from src.ha.ha_data import ha_service_data, ha_device_data
 from src.ha.home_assistant_command import HomeAssistantControlDemo
+
 
 
 def parse_command_json(json_data):
@@ -32,28 +32,28 @@ def parse_command_json(json_data):
         if not isinstance(json_data, dict):
             logging.error("JSON 数据格式错误，应为字典类型")
             return False
-
+            
         # 检查必要字段
         if 'type' not in json_data or json_data['type'] != 'smart_home':
             cmd_type = json_data.get('type')
             logging.error(f"不支持的命令类型: {cmd_type}")
             return False
-
+            
         if 'payload' not in json_data or not isinstance(json_data['payload'], dict):
             logging.error("缺少 payload 字段或格式错误")
             return False
-
+            
         payload = json_data['payload']
-
+        
         # 提取设备类型和命令
         ha_domain = payload.get('ha_domain')
         ha_service = payload.get('ha_service')
         arguments = payload.get('arguments', {})
-
+        
         if not ha_domain or not ha_service:
             logging.error(f"缺少必要的字段: ha_domain={ha_domain}, ha_service={ha_service}")
             return False
-
+        
         # 记录接收到的设备类型和服务
         domain = ha_domain
         service = ha_service
@@ -65,36 +65,36 @@ def parse_command_json(json_data):
             # 通用命令
             'turn_on': 'ON',
             'turn_off': 'OFF',
-
+            
             # 空调特定命令 (climate domain)
             'fan_only': 'fan_only',
             'set_temperature': 'set_temp',
             'set_hvac_mode': 'set_mode',  # 设置空调模式
-            'set_fan_mode': 'set_fan',  # 设置风扇模式
-
+            'set_fan_mode': 'set_fan',    # 设置风扇模式
+            
             # 窗帘特定命令 (cover domain)
-            'open_cover': 'ON',  # 映射到窗帘的 ON 命令
-            'close_cover': 'OFF',  # 映射到窗帘的 OFF 命令
-            'stop_cover': 'STOP',  # 停止窗帘命令
-
+            'open_cover': 'ON',     # 映射到窗帘的 ON 命令
+            'close_cover': 'OFF',   # 映射到窗帘的 OFF 命令
+            'stop_cover': 'STOP',   # 停止窗帘命令
+            
             # 灯光特定命令 (light domain)
             'set_brightness': 'set_brightness',  # 设置亮度
-            'set_color': 'set_color',  # 设置颜色
-
+            'set_color': 'set_color',           # 设置颜色
+            
             # 电视特定命令
-            'press': 'PRESS'  # 按下按钮
+            'press': 'PRESS'              # 按下按钮
         }
-
+        
         device_command = command_map.get(ha_service)
         if not device_command:
             service = ha_service
             logging.error(f"不支持的服务: {service}")
             return False
-
+        
         # 创建 HomeAssistant API 实例并执行命令
         ha_command_api = HomeAssistantCommandAPI()
         ha_command_api.command_device(ha_domain, device_command, arguments)
-
+        
         return True
     except Exception as e:
         error_msg = str(e)
@@ -102,12 +102,13 @@ def parse_command_json(json_data):
         return False
 
 
+
 class HomeAssistantCommandAPI:
     def __init__(self, host=ha_service_data["host"], port=ha_service_data["port"]):
         self.demo = HomeAssistantControlDemo(host, port)
         self.demo.set_token(ha_service_data["token"])
 
-    def command_device(self, device_type, device_command, params={}):
+    def command_device(self,device_type,device_command,params = {}):
         # 检查连接
         if not self.demo.check_api():
             print("API连接失败，请检查网络和令牌")
@@ -196,7 +197,7 @@ class HomeAssistantCommandAPI:
             elif device_command == "STOP":
                 print("停止窗帘...")
                 self.demo.curtain_stop(entity_id)
-        elif device_type == "tv":
+        elif device_type=="tv":
             if device_command == "ON":
                 print("开启电视...")
                 self.demo.tv_on(entity_id)
@@ -226,35 +227,54 @@ class HomeAssistantCommandAPI:
                 print("关闭空气净化器...")
                 self.demo.air_cleaner_off(entity_id)
 
-
 if __name__ == "__main__":
     # 示例1：解析命令JSON
-    command_json = {'session_id': 'aad192cf-669a-441f-9f48-0cfb2daaf5c3', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'light', 'ha_service': 'turn_on',
-                                'arguments': {'entity_id': 'light.philips_cn_876480801_pceilb_s_2_light'}}}
-
+    command_json = {
+        "session_id": "ce37d536-205a-4451-b4da-da50ae180305",
+        "type": "smart_home",
+        "payload": {
+            "ha_domain": "light",
+            "ha_service": "turn_on",
+            "arguments": {}
+        }
+    }
+    
     result = parse_command_json(command_json)
     result_val = result
     print(f"命令执行结果: {result_val}")
-    time.sleep(3)
+    
     # 示例2：使用自定义实体ID
-    command_json = {'session_id': 'aad192cf-669a-441f-9f48-0cfb2daaf5c3', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'light', 'ha_service': 'turn_on',
-                                'arguments': {'entity_id': 'light.philips_cn_876480801_pceilb_s_2_light'}}}
-
+    command_json = {
+        "session_id": "ce37d536-205a-4451-b4da-da50ae180305",
+        "type": "smart_home",
+        "payload": {
+            "ha_domain": "light",
+            "ha_service": "turn_off",
+            "arguments": {
+                "entity_id": "light.custom_light"
+            }
+        }
+    }
+    
     result = parse_command_json(command_json)
     result_val = result
     print(f"命令执行结果: {result_val}")
-    time.sleep(3)
+    
     # 示例3：控制窗帘
-    command_json = {'session_id': '5c524297-1340-4953-a4e8-8382eb0c57d4', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'cover', 'ha_service': 'open_cover',
-                                'arguments': {'entity_id': 'cover.xiaomi_cn_875995008_acn010_s_2_curtain'}}}
-
+    command_json = {
+        "session_id": "ce37d536-205a-4451-b4da-da50ae180305",
+        "type": "smart_home",
+        "payload": {
+            "ha_domain": "cover",
+            "ha_service": "open_cover",
+            "arguments": {}
+        }
+    }
+    
     result = parse_command_json(command_json)
     result_val = result
     print(f"命令执行结果: {result_val}")
-    time.sleep(3)
+    
     # 示例4：控制空调（使用climate领域）
     command_json = {
         "session_id": "ce37d536-205a-4451-b4da-da50ae180305",
@@ -267,16 +287,24 @@ if __name__ == "__main__":
             }
         }
     }
-
+    
     result = parse_command_json(command_json)
     result_val = result
     print(f"命令执行结果: {result_val}")
-    time.sleep(3)
+    
     # 示例5：使用button实体控制电视（按下按钮）
-    command_json = {'session_id': 'aad192cf-669a-441f-9f48-0cfb2daaf5c3', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'fan', 'ha_service': 'turn_on',
-                                'arguments': {'entity_id': 'fan.xiaomi_cn_858574342_va3_s_2_air_purifier'}}}
-
+    command_json = {
+        "session_id": "ce37d536-205a-4451-b4da-da50ae180305",
+        "type": "smart_home",
+        "payload": {
+            "ha_domain": "button",
+            "ha_service": "press",
+            "arguments": {
+                "entity_id": "button.tv_power"
+            }
+        }
+    }
+    
     result = parse_command_json(command_json)
     result_val = result
     print(f"命令执行结果: {result_val}")
