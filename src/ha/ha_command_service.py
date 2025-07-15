@@ -230,7 +230,7 @@ class HomeAssistantCommandAPI:
 if __name__ == "__main__":
     # 示例1：解析命令JSON
     command_json = {'session_id': 'aad192cf-669a-441f-9f48-0cfb2daaf5c3', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'light', 'ha_service': 'turn_off',
+                    'payload': {'ha_domain': 'light', 'ha_service': 'turn_on',
                                 'arguments': {'entity_id': 'light.philips_cn_876480801_pceilb_s_2_light'}}}
 
     result = parse_command_json(command_json)
@@ -239,8 +239,8 @@ if __name__ == "__main__":
     time.sleep(3)
     # 示例2：使用自定义实体ID
     command_json = {'session_id': 'aad192cf-669a-441f-9f48-0cfb2daaf5c3', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'light', 'ha_service': 'turn_off',
-                                'arguments': {'entity_id': 'light.ftd_cn_1123337548_ftdlmp_s_2_light'}}}
+                    'payload': {'ha_domain': 'light', 'ha_service': 'turn_on',
+                                'arguments': {'entity_id': 'light.philips_cn_876480801_pceilb_s_2_light'}}}
 
     result = parse_command_json(command_json)
     result_val = result
@@ -248,8 +248,8 @@ if __name__ == "__main__":
     time.sleep(3)
     # 示例3：控制窗帘
     command_json = {'session_id': '5c524297-1340-4953-a4e8-8382eb0c57d4', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'cover', 'ha_service': 'close_cover',
-                                'arguments': {'entity_id': 'cover.xiaomi_cn_708478375_acn009_s_2_curtain'}}}
+                    'payload': {'ha_domain': 'cover', 'ha_service': 'open_cover',
+                                'arguments': {'entity_id': 'cover.xiaomi_cn_875995008_acn010_s_2_curtain'}}}
 
     result = parse_command_json(command_json)
     result_val = result
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         "type": "smart_home",
         "payload": {
             "ha_domain": "climate",
-            "ha_service": "turn_off",
+            "ha_service": "turn_on",
             "arguments": {
                 "entity_id": "climate.scdvb_cn_1102732000_acm"
             }
@@ -274,8 +274,8 @@ if __name__ == "__main__":
     time.sleep(3)
     # 示例5：使用button实体控制电视（按下按钮）
     command_json = {'session_id': 'aad192cf-669a-441f-9f48-0cfb2daaf5c3', 'type': 'smart_home',
-                    'payload': {'ha_domain': 'fan', 'ha_service': 'turn_off',
-                                'arguments': {'entity_id': 'fan.zhimi_cn_287827089_ma2_s_2_air_purifier'}}}
+                    'payload': {'ha_domain': 'fan', 'ha_service': 'turn_on',
+                                'arguments': {'entity_id': 'fan.xiaomi_cn_858574342_va3_s_2_air_purifier'}}}
 
     result = parse_command_json(command_json)
     result_val = result
