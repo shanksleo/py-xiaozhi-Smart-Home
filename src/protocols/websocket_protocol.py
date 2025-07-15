@@ -121,6 +121,11 @@ class WebsocketProtocol(Protocol):
                 self._on_network_error(f"无法连接服务: {str(e)}")
             return False
 
+    async def delayed_close_audio_channel(self):
+        logger.info("准备在10秒后关闭音频通道")
+        await asyncio.sleep(10)  # 延迟10秒
+        await self.close_audio_channel()
+        logger.info("音频通道已关闭")
     async def _message_handler(self):
         """
         处理接收到的WebSocket消息.
@@ -141,8 +146,8 @@ class WebsocketProtocol(Protocol):
                             parse_command_json(data)
                             logger.info(f"smart_home data = {data}")
                             # 收到 smart_home 消息后主动断开 websocket 连接
-                            logger.info("收到 smart_home 消息，主动断开 websocket 连接")
-                            asyncio.create_task(self.close_audio_channel())
+                            logger.info("收到 smart_home 消息，10s主动断开 websocket 连接")
+                            asyncio.create_task(self.delayed_close_audio_channel())
                         else:
                             if self._on_incoming_json:
                                 self._on_incoming_json(data)
