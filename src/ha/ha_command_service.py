@@ -7,13 +7,23 @@ from src.ha.home_assistant_command import HomeAssistantControlDemo
 
 def parse_command_json(json_data):
     """
-    解析智能家居命令JSON数据
+    解析智能家居命令的 JSON 数据并执行相应的设备控制
     
-    Args:
-        json_data (dict): 包含智能家居命令的JSON数据
+    参数:
+        json_data (dict): 包含智能家居命令的 JSON 数据
         
-    Returns:
-        bool: 命令执行是否成功
+    示例 JSON 格式:
+    {
+        'session_id': 'cbe64e3e-4975-4a2e-8a04-5a412bbbb38d', 
+        'type': 'smart_home', 
+        'payload': {
+            'ha_domain': 'light', 
+            'ha_service': 'turn_on', 
+            'arguments': {
+                'entity_id': 'light.ftd_cn_1123337548_ftdlmp_s_2_light'
+            }
+        }
+    }
     """
     try:
         data_str = json_data
@@ -49,9 +59,8 @@ def parse_command_json(json_data):
         service = ha_service
         args = arguments
         logging.info(f"接收到命令: 设备类型={domain}, 服务={service}, 参数={args}")
-        
+        print(f"接收到命令: 设备类型={domain}, 服务={service}, 参数={args}")
         # 将 ha_service 转换为设备命令格式
-        # 命令映射字典
         command_map = {
             # 通用命令
             'turn_on': 'ON',
@@ -72,10 +81,6 @@ def parse_command_json(json_data):
             'set_brightness': 'set_brightness',  # 设置亮度
             'set_color': 'set_color',           # 设置颜色
             
-            # 空气净化器特定命令 (fan domain)
-            'turn_on': 'ON',                    # 开启空气净化器
-            'turn_off': 'OFF',                  # 关闭空气净化器
-            
             # 电视特定命令
             'press': 'PRESS'              # 按下按钮
         }
@@ -85,9 +90,6 @@ def parse_command_json(json_data):
             service = ha_service
             logging.error(f"不支持的服务: {service}")
             return False
-        
-        entity_id = arguments.get('entity_id', 'unknown')
-        logging.info(f"[HACommandService] 解析 命令: {ha_service}, 设备ID: {entity_id}")
         
         # 创建 HomeAssistant API 实例并执行命令
         ha_command_api = HomeAssistantCommandAPI()
@@ -111,10 +113,12 @@ class HomeAssistantCommandAPI:
         if not self.demo.check_api():
             print("API连接失败，请检查网络和令牌")
             return
-
+        print(f"device_type = {device_type}")
+        print(f"device_command = {device_command}")
+        print(f"params = {params}")
         # 优先使用用户提供的实体 ID
         entity_id = params.get('entity_id')
-        
+        print(f"entity_id = {entity_id}")
         # 如果用户没有提供实体 ID，则使用预定义的实体 ID
         if not entity_id:
             if device_type not in ha_device_data.keys():
@@ -215,8 +219,13 @@ class HomeAssistantCommandAPI:
                 print("关闭开关...")
                 self.demo.switch_off(entity_id)
 
-        
-
+        elif device_type == "fan":
+            if device_command == "ON":
+                print("打开空气净化器...")
+                self.demo.air_cleaner_on(entity_id)
+            elif device_command == "OFF":
+                print("关闭空气净化器...")
+                self.demo.air_cleaner_off(entity_id)
 
 if __name__ == "__main__":
     # 示例1：解析命令JSON

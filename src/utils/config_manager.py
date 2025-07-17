@@ -30,7 +30,7 @@ class ConfigManager:
         "WAKE_WORD_OPTIONS": {
             "USE_WAKE_WORD": True,
             "MODEL_PATH": "models/vosk-model-small-cn-0.22",
-            "WAKE_WORDS": ["小智"],
+            "WAKE_WORDS": ["汇小牛"],
         },
         "CAMERA": {
             "camera_index": 0,
