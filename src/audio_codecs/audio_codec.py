@@ -86,12 +86,18 @@ class AudioCodec:
             
             # 优先选择支持16kHz采样率的设备，如果没有则选择sysdefault
             preferred_output_device = None
+            preferred_input_device = 'UACDemo'
             sysdefault_device = None
             
             for i, device in enumerate(devices):
                 if device['max_input_channels'] > 0:
                     input_candidates.append((i, device['name'], device['max_input_channels']))
-                    if input_device is None:
+                    # 新增：检查设备名称是否包含首选前缀
+                    if preferred_input_device in device['name']:
+                        input_device = i
+                        logger.info(f"选择首选输入设备 {i}: {device['name']} (通道数: {device['max_input_channels']})")
+                    # 修改：仅在input_device未设置时才执行原有逻辑
+                    elif input_device is None:
                         input_device = i
                         logger.info(f"选择输入设备 {i}: {device['name']} (通道数: {device['max_input_channels']})")
                 if device['max_output_channels'] > 0:
@@ -611,7 +617,7 @@ class AudioCodec:
                 return encoded_data
 
             except asyncio.QueueEmpty:
-                logger.debug("输入缓冲区为空，无音频数据可读取")
+                # logger.debug("输入缓冲区为空，无音频数据可读取")
                 return None
 
         except Exception as e:

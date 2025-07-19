@@ -96,7 +96,7 @@ class AudioConfig:
     INPUT_SAMPLE_RATE = 16000  # 输入采样率16kHz
     # 输出采样率：官方服务器使用24kHz，其他使用16kHz
     _ota_url = config.get_config("SYSTEM_OPTIONS.NETWORK.OTA_VERSION_URL")
-    OUTPUT_SAMPLE_RATE = 24000 if is_official_server(_ota_url) else 16000
+    OUTPUT_SAMPLE_RATE = 24000 if is_official_server(_ota_url) else 48000
     CHANNELS = 1
 
     # 动态获取帧长度
