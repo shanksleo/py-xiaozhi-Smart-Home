@@ -1224,6 +1224,11 @@ class Application:
         唤醒词检测回调.
         """
         logger.info(f"检测到唤醒词: {wake_word} (完整文本: {full_text})")
+        
+        # 使用TTS回复"我在"
+        from src.utils.common_utils import play_audio_nonblocking
+        play_audio_nonblocking("我在")
+        
         await self._handle_wake_word_detected(wake_word)
 
     async def _handle_wake_word_detected(self, wake_word):
