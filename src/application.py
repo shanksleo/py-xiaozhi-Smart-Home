@@ -228,6 +228,10 @@ class Application:
 
             logger.info("应用程序已启动，按Ctrl+C退出")
 
+            # 使用TTS 播放"你的小汇管家上线了"
+            from src.utils.common_utils import play_audio_nonblocking
+            play_audio_nonblocking("你的小汇管家上线了")
+
             # 等待应用程序运行
             while self.running:
                 await asyncio.sleep(1)
