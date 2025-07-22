@@ -77,66 +77,104 @@ def play_audio_file_nonblocking(file_path: str) -> None:
                 logger.error(f"音频文件不存在: {file_path}")
                 return
                 
-            # 尝试使用sounddevice播放WAV文件
-            try:
-                import wave
-                import numpy as np
-                import sounddevice as sd
-                
-                # 加载WAV文件
-                with wave.open(str(audio_file), 'rb') as wav_file:
-                    frames = wav_file.readframes(-1)
-                    sample_rate = wav_file.getframerate()
-                    channels = wav_file.getnchannels()
+            # 检测系统架构，ARM系统优先使用系统播放器
+            import platform
+            machine = platform.machine().lower()
+            is_arm = machine in ['aarch64', 'armv7l', 'armv6l', 'arm64']
+            
+            if is_arm:
+                # ARM系统直接使用系统播放器，避免sounddevice兼容性问题
+                logger.info(f"检测到ARM架构({machine})，优先使用系统播放器")
+                fallback_system_player(file_path)
+            else:
+                # 非ARM系统尝试使用sounddevice播放WAV文件
+                try:
+                    import wave
+                    import numpy as np
+                    import sounddevice as sd
                     
-                    # 转换为numpy数组
-                    audio_data = np.frombuffer(frames, dtype=np.int16)
-                    if channels > 1:
-                        audio_data = audio_data.reshape(-1, channels)
-                        audio_data = audio_data[:, 0]  # 取第一个声道
+                    # 加载WAV文件
+                    with wave.open(str(audio_file), 'rb') as wav_file:
+                        frames = wav_file.readframes(-1)
+                        sample_rate = wav_file.getframerate()
+                        channels = wav_file.getnchannels()
                         
-                    # 转换为float32格式
-                    audio_data = audio_data.astype(np.float32) / 32767.0
-                    
-                    logger.info(f"音频文件加载成功: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
-                    
-                    # 播放音频
-                    sd.play(audio_data, samplerate=sample_rate, blocking=True)
-                    logger.info("音频文件播放完成")
-                    
-            except ImportError:
-                logger.warning("sounddevice或numpy不可用，尝试使用系统播放器")
-                fallback_system_player(file_path)
-            except Exception as e:
-                logger.error(f"使用sounddevice播放音频文件失败: {e}")
-                fallback_system_player(file_path)
+                        # 转换为numpy数组
+                        audio_data = np.frombuffer(frames, dtype=np.int16)
+                        if channels > 1:
+                            audio_data = audio_data.reshape(-1, channels)
+                            audio_data = audio_data[:, 0]  # 取第一个声道
+                            
+                        # 转换为float32格式
+                        audio_data = audio_data.astype(np.float32) / 32767.0
+                        
+                        logger.info(f"音频文件加载成功: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
+                        
+                        # 播放音频
+                        sd.play(audio_data, samplerate=sample_rate, blocking=True)
+                        logger.info("音频文件播放完成")
+                        
+                except ImportError:
+                    logger.warning("sounddevice或numpy不可用，尝试使用系统播放器")
+                    fallback_system_player(file_path)
+                except Exception as e:
+                    logger.error(f"使用sounddevice播放音频文件失败: {e}")
+                    fallback_system_player(file_path)
                 
         except Exception as e:
             logger.error(f"音频文件播放线程出错: {e}")
 
     def fallback_system_player(file_path: str):
-        """使用系统播放器作为备用方案"""
+        """使用系统播放器作为备用方案，针对ARM Ubuntu优化"""
         try:
             import platform
             import subprocess
             
             system = platform.system()
+            machine = platform.machine().lower()
+            
             if system == "Darwin":  # macOS
                 subprocess.Popen(["afplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 logger.info("已使用afplay播放音频文件")
             elif system == "Linux":
-                if shutil.which("aplay"):
-                    subprocess.Popen(["aplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    logger.info("已使用aplay播放音频文件")
-                elif shutil.which("paplay"):
-                    subprocess.Popen(["paplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    logger.info("已使用paplay播放音频文件")
-                else:
-                    logger.warning("未找到可用的Linux音频播放器")
+                # ARM系统优先使用系统播放器，避免sounddevice兼容性问题
+                is_arm = machine in ['aarch64', 'armv7l', 'armv6l', 'arm64']
+                
+                # 定义播放器优先级列表（ARM系统优先使用系统播放器）
+                players = ["aplay", "paplay", "ffplay", "mpg123", "sox"] if is_arm else ["aplay", "paplay"]
+                
+                for player in players:
+                    if shutil.which(player):
+                        try:
+                            if player == "aplay":
+                                # aplay with better error handling for ARM
+                                cmd = ["aplay", "-q", file_path]
+                            elif player == "paplay":
+                                cmd = ["paplay", file_path]
+                            elif player == "ffplay":
+                                cmd = ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", file_path]
+                            elif player == "mpg123":
+                                cmd = ["mpg123", "-q", file_path]
+                            elif player == "sox":
+                                cmd = ["play", "-q", file_path]
+                            else:
+                                cmd = [player, file_path]
+                                
+                            subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            logger.info(f"已使用{player}播放音频文件 (ARM优化: {is_arm})")
+                            return
+                        except Exception as e:
+                            logger.warning(f"{player}播放失败: {e}，尝试下一个播放器")
+                            continue
+                            
+                logger.warning(f"未找到可用的Linux音频播放器，已尝试: {players}")
             elif system == "Windows":
-                import winsound
-                winsound.PlaySound(file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
-                logger.info("已使用Windows系统播放器播放音频文件")
+                try:
+                    import winsound
+                    winsound.PlaySound(file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+                    logger.info("已使用Windows系统播放器播放音频文件")
+                except Exception as e:
+                    logger.error(f"Windows播放器失败: {e}")
             else:
                 logger.warning(f"不支持的系统 {system}，无法播放音频文件")
                 
