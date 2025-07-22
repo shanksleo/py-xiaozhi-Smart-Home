@@ -96,8 +96,7 @@ class TestAudioPlaybackARMUbuntu(unittest.TestCase):
                 if is_ubuntu:
                     for line in content.split('\n'):
                         if line.startswith('VERSION='):
-                            version = line.split('=')[1].strip('"')
-                            logger.info(f"Ubuntu版本: {version}")
+                            logger.info(f"Ubuntu版本: {line.split('=')[1].strip('\"')}")
                             break
         except Exception as e:
             logger.warning(f"无法读取系统版本信息: {e}")
@@ -127,60 +126,28 @@ class TestAudioPlaybackARMUbuntu(unittest.TestCase):
         
         available_players = []
         
-        # 根据操作系统检查相应的音频播放器
-        if platform.system() == "Linux":
-            # Linux系统检查
-            if shutil.which("aplay"):
-                available_players.append("aplay")
-                self.logger.info("检测到aplay播放器 (ALSA)")
-            
-            if shutil.which("paplay"):
-                available_players.append("paplay")
-                self.logger.info("检测到paplay播放器 (PulseAudio)")
-                
-        elif platform.system() == "Darwin":  # macOS
-            if shutil.which("afplay"):
-                available_players.append("afplay")
-                self.logger.info("检测到afplay播放器 (macOS)")
-                
-        elif platform.system() == "Windows":
-            # Windows系统有内置的winsound模块
-            try:
-                import winsound
-                available_players.append("winsound")
-                self.logger.info("检测到winsound播放器 (Windows)")
-            except ImportError:
-                pass
+        # 检查aplay (ALSA)
+        if shutil.which("aplay"):
+            available_players.append("aplay")
+            self.logger.info("检测到aplay播放器 (ALSA)")
         
-        # 检查其他跨平台播放器
+        # 检查paplay (PulseAudio)
+        if shutil.which("paplay"):
+            available_players.append("paplay")
+            self.logger.info("检测到paplay播放器 (PulseAudio)")
+        
+        # 检查其他可能的播放器
         other_players = ["mpg123", "sox", "ffplay"]
         for player in other_players:
             if shutil.which(player):
                 available_players.append(player)
                 self.logger.info(f"检测到{player}播放器")
         
-        # 检查sounddevice是否可用作为音频输出方案
-        sounddevice_available = False
-        try:
-            import sounddevice as sd
-            devices = sd.query_devices()
-            output_devices = [d for d in devices if d['max_output_channels'] > 0]
-            if output_devices:
-                sounddevice_available = True
-                self.logger.info("sounddevice库可用，可作为音频输出方案")
-        except (ImportError, Exception):
-            pass
-        
         self.logger.info(f"可用音频播放器: {available_players}")
+        self.assertGreater(len(available_players), 0, "未检测到任何可用的系统音频播放器")
         
-        # 如果有系统播放器或sounddevice可用，则测试通过
-        if len(available_players) > 0 or sounddevice_available:
-            self.test_results['system_players'] = available_players
-            if sounddevice_available:
-                self.test_results['sounddevice_fallback'] = True
-            self.logger.info("系统音频播放器可用性测试通过")
-        else:
-            self.fail("未检测到任何可用的系统音频播放器或sounddevice库")
+        self.test_results['system_players'] = available_players
+        self.logger.info("系统音频播放器可用性测试通过")
     
     def test_sounddevice_compatibility(self):
         """测试sounddevice库兼容性"""
