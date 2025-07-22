@@ -228,9 +228,18 @@ class Application:
 
             logger.info("应用程序已启动，按Ctrl+C退出")
 
-            # 使用TTS 播放"你的小汇管家上线了"
-            from src.utils.common_utils import play_audio_nonblocking
-            play_audio_nonblocking("你的小汇管家上线了")
+            # # 使用TTS 播放"你的小汇管家上线了"
+            # from src.utils.common_utils import play_audio_nonblocking
+            # play_audio_nonblocking("你的小汇管家上线了")
+            # 播放唤醒回复音频文件
+            from src.utils.common_utils import play_audio_file_nonblocking
+            import os
+
+            # 获取音频文件的绝对路径
+            online_audio_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "audio",
+                                             "start_online.wav")
+            logger.info(f"播放唤醒回复音频: {online_audio_path}")
+            play_audio_file_nonblocking(online_audio_path)
 
             # 等待应用程序运行
             while self.running:
@@ -1237,9 +1246,14 @@ class Application:
         """
         logger.info(f"检测到唤醒词: {wake_word} (完整文本: {full_text})")
         
-        # 使用TTS回复"我在"
-        from src.utils.common_utils import play_audio_nonblocking
-        play_audio_nonblocking("我在")
+        # 播放唤醒回复音频文件
+        from src.utils.common_utils import play_audio_file_nonblocking
+        import os
+        
+        # 获取音频文件的绝对路径
+        wakeup_audio_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "audio", "wakeup_words.wav")
+        logger.info(f"播放唤醒回复音频: {wakeup_audio_path}")
+        play_audio_file_nonblocking(wakeup_audio_path)
         
         await self._handle_wake_word_detected(wake_word)
 

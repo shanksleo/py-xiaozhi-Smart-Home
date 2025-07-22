@@ -55,6 +55,101 @@ def copy_to_clipboard(text: str) -> bool:
         return False
 
 
+def play_audio_file_nonblocking(file_path: str) -> None:
+    """
+    在非阻塞模式下播放音频文件 - 不使用asyncio，避免阻塞
+
+    这个函数不返回任何值，也不抛出任何异常，确保始终快速返回
+
+    Args:
+        file_path: 要播放的音频文件路径
+    """
+    import threading
+    from pathlib import Path
+
+    def audio_file_worker():
+        try:
+            logger.info(f"开始播放音频文件: {file_path}")
+            
+            # 检查文件是否存在
+            audio_file = Path(file_path)
+            if not audio_file.exists():
+                logger.error(f"音频文件不存在: {file_path}")
+                return
+                
+            # 尝试使用sounddevice播放WAV文件
+            try:
+                import wave
+                import numpy as np
+                import sounddevice as sd
+                
+                # 加载WAV文件
+                with wave.open(str(audio_file), 'rb') as wav_file:
+                    frames = wav_file.readframes(-1)
+                    sample_rate = wav_file.getframerate()
+                    channels = wav_file.getnchannels()
+                    
+                    # 转换为numpy数组
+                    audio_data = np.frombuffer(frames, dtype=np.int16)
+                    if channels > 1:
+                        audio_data = audio_data.reshape(-1, channels)
+                        audio_data = audio_data[:, 0]  # 取第一个声道
+                        
+                    # 转换为float32格式
+                    audio_data = audio_data.astype(np.float32) / 32767.0
+                    
+                    logger.info(f"音频文件加载成功: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
+                    
+                    # 播放音频
+                    sd.play(audio_data, samplerate=sample_rate, blocking=True)
+                    logger.info("音频文件播放完成")
+                    
+            except ImportError:
+                logger.warning("sounddevice或numpy不可用，尝试使用系统播放器")
+                fallback_system_player(file_path)
+            except Exception as e:
+                logger.error(f"使用sounddevice播放音频文件失败: {e}")
+                fallback_system_player(file_path)
+                
+        except Exception as e:
+            logger.error(f"音频文件播放线程出错: {e}")
+
+    def fallback_system_player(file_path: str):
+        """使用系统播放器作为备用方案"""
+        try:
+            import platform
+            import subprocess
+            
+            system = platform.system()
+            if system == "Darwin":  # macOS
+                subprocess.Popen(["afplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                logger.info("已使用afplay播放音频文件")
+            elif system == "Linux":
+                if shutil.which("aplay"):
+                    subprocess.Popen(["aplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    logger.info("已使用aplay播放音频文件")
+                elif shutil.which("paplay"):
+                    subprocess.Popen(["paplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    logger.info("已使用paplay播放音频文件")
+                else:
+                    logger.warning("未找到可用的Linux音频播放器")
+            elif system == "Windows":
+                import winsound
+                winsound.PlaySound(file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+                logger.info("已使用Windows系统播放器播放音频文件")
+            else:
+                logger.warning(f"不支持的系统 {system}，无法播放音频文件")
+                
+        except Exception as e:
+            logger.error(f"系统播放器备用方案出错: {e}")
+
+    # 创建并启动线程
+    audio_thread = threading.Thread(target=audio_file_worker)
+    audio_thread.daemon = True
+    audio_thread.start()
+    logger.info(f"已启动非阻塞音频文件播放线程: {file_path}")
+
+
 def play_audio_nonblocking(text: str) -> None:
     """
     在非阻塞模式下播放文本音频 - 不使用asyncio，避免阻塞
