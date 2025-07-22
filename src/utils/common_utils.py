@@ -82,6 +82,7 @@ def play_audio_file_nonblocking(file_path: str) -> None:
                 import wave
                 import numpy as np
                 import sounddevice as sd
+                import platform
                 
                 # 加载WAV文件
                 with wave.open(str(audio_file), 'rb') as wav_file:
@@ -99,6 +100,13 @@ def play_audio_file_nonblocking(file_path: str) -> None:
                     audio_data = audio_data.astype(np.float32) / 32767.0
                     
                     logger.info(f"音频文件加载成功: 采样率{sample_rate}Hz, 长度{len(audio_data)}样本")
+                    
+                    # ARM Ubuntu系统特殊处理
+                    if platform.system() == "Linux" and platform.machine() in ["aarch64", "armv7l"]:
+                        # 在ARM Ubuntu上，优先使用系统播放器避免sounddevice兼容性问题
+                        logger.info("检测到ARM Ubuntu系统，优先使用系统播放器")
+                        fallback_system_player(file_path)
+                        return
                     
                     # 播放音频
                     sd.play(audio_data, samplerate=sample_rate, blocking=True)
@@ -125,18 +133,39 @@ def play_audio_file_nonblocking(file_path: str) -> None:
                 subprocess.Popen(["afplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 logger.info("已使用afplay播放音频文件")
             elif system == "Linux":
-                if shutil.which("aplay"):
-                    subprocess.Popen(["aplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    logger.info("已使用aplay播放音频文件")
-                elif shutil.which("paplay"):
-                    subprocess.Popen(["paplay", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    logger.info("已使用paplay播放音频文件")
-                else:
-                    logger.warning("未找到可用的Linux音频播放器")
+                # ARM Ubuntu系统优化的播放器选择顺序
+                players_to_try = [
+                    ("aplay", ["aplay", "-q", file_path]),  # ALSA播放器，静默模式
+                    ("paplay", ["paplay", file_path]),      # PulseAudio播放器
+                    ("ffplay", ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", file_path]),  # FFmpeg播放器
+                    ("mpg123", ["mpg123", "-q", file_path]),  # MP3播放器（也支持WAV）
+                    ("sox", ["play", "-q", file_path])       # SoX播放器
+                ]
+                
+                played_successfully = False
+                for player_name, command in players_to_try:
+                    if shutil.which(player_name):
+                        try:
+                            # 使用Popen启动播放器，不等待完成
+                            process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            logger.info(f"已使用{player_name}播放音频文件")
+                            played_successfully = True
+                            break
+                        except Exception as e:
+                            logger.warning(f"{player_name}播放失败: {e}，尝试下一个播放器")
+                            continue
+                
+                if not played_successfully:
+                    logger.error("所有Linux音频播放器都不可用或播放失败")
+                    logger.info("建议安装音频播放器: sudo apt-get install alsa-utils pulseaudio-utils ffmpeg")
+                    
             elif system == "Windows":
-                import winsound
-                winsound.PlaySound(file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
-                logger.info("已使用Windows系统播放器播放音频文件")
+                try:
+                    import winsound
+                    winsound.PlaySound(file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+                    logger.info("已使用Windows系统播放器播放音频文件")
+                except Exception as e:
+                    logger.error(f"Windows音频播放失败: {e}")
             else:
                 logger.warning(f"不支持的系统 {system}，无法播放音频文件")
                 
