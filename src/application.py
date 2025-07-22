@@ -231,15 +231,19 @@ class Application:
             # # 使用TTS 播放"你的小汇管家上线了"
             # from src.utils.common_utils import play_audio_nonblocking
             # play_audio_nonblocking("你的小汇管家上线了")
-            # 播放唤醒回复音频文件
-            from src.utils.common_utils import play_audio_file_nonblocking
+            # 播放启动音频文件
             import os
 
             # 获取音频文件的绝对路径
             online_audio_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "audio",
                                              "start_online.wav")
-            logger.info(f"播放唤醒回复音频: {online_audio_path}")
-            play_audio_file_nonblocking(online_audio_path)
+            logger.info(f"播放启动音频: {online_audio_path}")
+            
+            # 使用音频编解码器服务播放音频文件
+            if self.audio_codec:
+                await self.audio_codec.play_wav_file_nonblocking(online_audio_path)
+            else:
+                logger.warning("音频编解码器未初始化，无法播放启动音频文件")
 
             # 等待应用程序运行
             while self.running:
@@ -1247,13 +1251,17 @@ class Application:
         logger.info(f"检测到唤醒词: {wake_word} (完整文本: {full_text})")
         
         # 播放唤醒回复音频文件
-        from src.utils.common_utils import play_audio_file_nonblocking
         import os
         
         # 获取音频文件的绝对路径
         wakeup_audio_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "audio", "wakeup_words.wav")
         logger.info(f"播放唤醒回复音频: {wakeup_audio_path}")
-        play_audio_file_nonblocking(wakeup_audio_path)
+        
+        # 使用音频编解码器服务播放音频文件
+        if self.audio_codec:
+            await self.audio_codec.play_wav_file_nonblocking(wakeup_audio_path)
+        else:
+            logger.warning("音频编解码器未初始化，无法播放音频文件")
         
         await self._handle_wake_word_detected(wake_word)
 

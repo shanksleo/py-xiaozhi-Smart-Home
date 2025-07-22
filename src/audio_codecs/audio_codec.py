@@ -1,6 +1,8 @@
 import asyncio
 import time
+import wave
 from collections import deque
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -795,6 +797,117 @@ class AudioCodec:
                     resampler.resample_chunk(empty_array, last=True)
             except Exception as e:
                 logger.warning(f"清理{name}重采样器失败: {e}")
+
+    async def play_wav_file_nonblocking(self, file_path: str):
+        """
+        非阻塞播放 WAV 文件.
+        
+        Args:
+            file_path: WAV 文件路径
+        """
+        def audio_file_worker():
+            try:
+                logger.info(f"开始播放音频文件: {file_path}")
+                
+                # 检查文件是否存在
+                audio_file = Path(file_path)
+                if not audio_file.exists():
+                    logger.error(f"音频文件不存在: {file_path}")
+                    return
+                
+                # 加载 WAV 文件
+                audio_data, sample_rate = self._load_wav_file(file_path)
+                if audio_data is None:
+                    return
+                
+                # 重采样到输出设备采样率
+                if sample_rate != self.device_output_sample_rate:
+                    logger.info(f"重采样音频: {sample_rate}Hz -> {self.device_output_sample_rate}Hz")
+                    audio_data = self._resample_audio_data(audio_data, sample_rate, self.device_output_sample_rate)
+                
+                # 分块播放音频数据
+                chunk_size = self._device_output_frame_size
+                for i in range(0, len(audio_data), chunk_size):
+                    if self._is_closing:
+                        break
+                    
+                    chunk = audio_data[i:i + chunk_size]
+                    if len(chunk) < chunk_size:
+                        # 填充最后一块
+                        padded_chunk = np.zeros(chunk_size, dtype=np.int16)
+                        padded_chunk[:len(chunk)] = chunk
+                        chunk = padded_chunk
+                    
+                    # 将音频数据放入输出缓冲区
+                    self._put_audio_data_safe(self._output_buffer, chunk)
+                    
+                    # 控制播放速度
+                    time.sleep(AudioConfig.FRAME_DURATION / 1000.0)
+                
+                logger.info(f"音频文件播放完成: {file_path}")
+                
+            except Exception as e:
+                logger.error(f"播放音频文件失败: {e}")
+        
+        # 在新线程中播放音频
+        import threading
+        thread = threading.Thread(target=audio_file_worker, daemon=True)
+        thread.start()
+    
+    def _load_wav_file(self, file_path: str):
+        """
+        加载 WAV 文件.
+        
+        Args:
+            file_path: WAV 文件路径
+            
+        Returns:
+            (audio_data, sample_rate) 或 (None, None) 如果失败
+        """
+        try:
+            with wave.open(file_path, 'rb') as wav_file:
+                frames = wav_file.readframes(-1)
+                sample_rate = wav_file.getframerate()
+                channels = wav_file.getnchannels()
+                
+                # 转换为numpy数组
+                audio_data = np.frombuffer(frames, dtype=np.int16)
+                
+                # 如果是多声道，转换为单声道
+                if channels > 1:
+                    audio_data = audio_data.reshape(-1, channels)
+                    audio_data = audio_data[:, 0]  # 取第一个声道
+                
+                logger.info(f"加载音频文件成功: {file_path}, 采样率: {sample_rate}Hz, 声道数: {channels}, 长度: {len(audio_data)} 样本")
+                return audio_data, sample_rate
+                
+        except Exception as e:
+            logger.error(f"加载WAV文件失败 {file_path}: {e}")
+            return None, None
+    
+    def _resample_audio_data(self, audio_data: np.ndarray, input_rate: int, output_rate: int) -> np.ndarray:
+        """
+        重采样音频数据.
+        
+        Args:
+            audio_data: 输入音频数据
+            input_rate: 输入采样率
+            output_rate: 输出采样率
+            
+        Returns:
+            重采样后的音频数据
+        """
+        try:
+            # 使用 soxr 进行高质量重采样
+            resampler = soxr.ResampleStream(
+                input_rate, output_rate, 1, dtype=np.int16
+            )
+            resampled_data = resampler.resample_chunk(audio_data, last=True)
+            return resampled_data.astype(np.int16)
+            
+        except Exception as e:
+            logger.error(f"音频重采样失败: {e}")
+            return audio_data
 
     async def close(self):
         """
