@@ -96,7 +96,9 @@ class TestAudioPlaybackARMUbuntu(unittest.TestCase):
                 if is_ubuntu:
                     for line in content.split('\n'):
                         if line.startswith('VERSION='):
-                            logger.info(f"Ubuntu版本: {line.split('=')[1].strip('\"')}")
+
+                            version = line.split('=')[1].strip('"')
+                            logger.info(f"Ubuntu版本: {version}")
                             break
         except Exception as e:
             logger.warning(f"无法读取系统版本信息: {e}")
