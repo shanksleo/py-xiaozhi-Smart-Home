@@ -392,12 +392,17 @@ class Application:
 
     async def _initialize_components(self, mode: str, protocol: str):
         # 初始化音频编解码器
-        await self._initialize_audio()
+        import platform
 
         """
         初始化应用程序组件.
         """
         logger.info("正在初始化应用程序组件...")
+
+        if platform.system() != 'Darwin':
+            logger.info("当前系统不是 macOS")
+            await self._initialize_audio()
+
 
         # 设置显示类型（必须在设备状态设置之前）
         self._set_display_type(mode)
@@ -411,7 +416,10 @@ class Application:
         # 初始化MCP服务器
         self._initialize_mcp_server()
 
-
+        import platform
+        if platform.system() == 'Darwin':
+            logger.info('当前系统是 macOS')
+            await self._initialize_audio()
 
         # 设置协议
         self._set_protocol_type(protocol)

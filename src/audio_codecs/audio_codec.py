@@ -601,7 +601,7 @@ class AudioCodec:
             # 直接处理单帧数据，避免浪费
             try:
                 audio_data = self._input_buffer.get_nowait()
-                logger.debug(f"成功从输入缓冲区读取音频数据，缓冲区剩余: {self._input_buffer.qsize()}")
+                # logger.debug(f"成功从输入缓冲区读取音频数据，缓冲区剩余: {self._input_buffer.qsize()}")
 
                 # 严格验证数据长度
                 if len(audio_data) != AudioConfig.INPUT_FRAME_SIZE:
@@ -613,7 +613,7 @@ class AudioCodec:
                 # 转换为bytes并编码
                 pcm_data = audio_data.astype(np.int16).tobytes()
                 encoded_data = self.opus_encoder.encode(pcm_data, AudioConfig.INPUT_FRAME_SIZE)
-                logger.debug(f"音频编码成功，编码后大小: {len(encoded_data)} bytes")
+                # logger.debug(f"音频编码成功，编码后大小: {len(encoded_data)} bytes")
                 return encoded_data
 
             except asyncio.QueueEmpty:

@@ -107,16 +107,16 @@ class WebsocketProtocol(Protocol):
             try:
                 await asyncio.wait_for(self.hello_received.wait(), timeout=10.0)
                 self.connected = True
-                logger.info("已连接到WebSocket服务器")
+                logger.info("【websocket连接】已连接到WebSocket服务器")
                 return True
             except asyncio.TimeoutError:
-                logger.error("等待服务器hello响应超时")
+                logger.error("【websocket连接】等待服务器hello响应超时")
                 if self._on_network_error:
                     self._on_network_error("等待响应超时")
                 return False
 
         except Exception as e:
-            logger.error(f"WebSocket连接失败: {e}")
+            logger.error(f"【websocket连接】WebSocket连接失败: {e}")
             if self._on_network_error:
                 self._on_network_error(f"无法连接服务: {str(e)}")
             return False
@@ -208,12 +208,12 @@ class WebsocketProtocol(Protocol):
         Returns:
             bool: 连接是否成功
         """
-        logger.info(f"开始打开音频通道 - 当前连接状态: {self.connected}, WebSocket对象: {self.websocket is not None}")
+        logger.info(f"【websocket连接】开始打开音频通道 - 当前连接状态: {self.connected}, WebSocket对象: {self.websocket is not None}")
         if not self.connected:
             result = await self.connect()
-            logger.info(f"音频通道连接结果: {result}")
+            logger.info(f"【websocket连接】建联成功音频通道连接结果: {result}")
             return result
-        logger.info("音频通道已经打开")
+        logger.info("【websocket连接】本身已经存在音频通道已经打开")
         return True
 
     async def _handle_server_hello(self, data: dict):
@@ -270,14 +270,14 @@ class WebsocketProtocol(Protocol):
         """
         关闭音频通道.
         """
-        logger.info(f"开始关闭音频通道 - 当前连接状态: {self.connected}, WebSocket对象: {self.websocket is not None}")
+        logger.info(f"【websocket连接】开始关闭音频通道 - 当前连接状态: {self.connected}, WebSocket对象: {self.websocket is not None}")
         if self.websocket:
             try:
                 await self.websocket.close()
                 self.websocket = None
                 self.connected = False
-                logger.info("音频通道已关闭")
+                logger.info("【websocket连接】音频通道已关闭")
                 if self._on_audio_channel_closed:
                     await self._on_audio_channel_closed()
             except Exception as e:
-                logger.error(f"关闭WebSocket连接失败: {e}")
+                logger.error(f"【websocket连接】关闭WebSocket连接失败: {e}")
