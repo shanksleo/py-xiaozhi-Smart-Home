@@ -850,10 +850,13 @@ class AudioCodec:
                 logger.error(f"播放音频文件失败: {e}")
         
         # 在新线程中播放音频
-        import threading
-        thread = threading.Thread(target=audio_file_worker, daemon=True)
-        thread.start()
-    
+        # import threading
+        # thread = threading.Thread(target=audio_file_worker, daemon=True)
+        # thread.start()
+        # thread.join()
+
+        audio_file_worker()
+
     def _load_wav_file(self, file_path: str):
         """
         加载 WAV 文件.
